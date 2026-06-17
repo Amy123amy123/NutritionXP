@@ -607,7 +607,10 @@ async function start() {
   });
 }
 
+
 start().catch(err => {
-  console.error('Failed to start NutritionXP:', err.message);
+  console.error('Failed to start NutritionXP:');
+  console.error(err);
+  console.error(err.stack);
   process.exit(1);
 });
