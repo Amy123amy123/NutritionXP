@@ -2,10 +2,10 @@ const mysql = require('mysql2/promise');
 const { AsyncLocalStorage } = require('node:async_hooks');
 
 const config = {
-  host: process.env.DB_HOST || 'localhost',
-  user: process.env.DB_USER || 'root',
-  password: process.env.DB_PASSWORD || '',
-  database: process.env.DB_NAME || 'nutrition',
+  host: process.env.DB_HOST || 'sql12.freesqldatabase.com',
+  user: process.env.DB_USER || 'sql12830745',
+  password: process.env.DB_PASSWORD || 'iNJwhh5Vgv',
+  database: process.env.DB_NAME || 'sql12830745',
   waitForConnections: true,
   connectionLimit: 10
 };
@@ -115,7 +115,7 @@ async function widenExistingColumns() {
       MODIFY address TEXT NOT NULL,
       MODIFY city VARCHAR(255) NOT NULL,
       MODIFY country VARCHAR(255) NOT NULL,
-      MODIFY created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP;
+      MODIFY created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP;
 
     ALTER TABLE products
       MODIFY brand VARCHAR(255),
@@ -148,19 +148,19 @@ async function widenExistingColumns() {
       MODIFY action VARCHAR(100) NOT NULL,
       MODIFY source VARCHAR(100) NOT NULL,
       MODIFY product_name VARCHAR(255) NOT NULL,
-      MODIFY created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP;
+      MODIFY created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP;
 
     ALTER TABLE orders
       MODIFY order_number VARCHAR(100) NOT NULL,
       MODIFY status VARCHAR(100) NOT NULL DEFAULT 'Pending',
-      MODIFY created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP;
+      MODIFY created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP;
 
     ALTER TABLE order_items
       MODIFY source VARCHAR(100) NOT NULL,
       MODIFY name VARCHAR(255) NOT NULL,
       MODIFY image TEXT,
       MODIFY category VARCHAR(255),
-      MODIFY created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP;
+      MODIFY created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP;
   `);
 }
 
@@ -176,7 +176,7 @@ async function init() {
       address TEXT NOT NULL,
       city VARCHAR(255) NOT NULL,
       country VARCHAR(255) NOT NULL,
-      created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+      created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
     );
 
     CREATE TABLE IF NOT EXISTS products (
@@ -193,8 +193,8 @@ async function init() {
       variation VARCHAR(255),
       category VARCHAR(255),
       description TEXT,
-      created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+      created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP NOT NULL
     );
 
     CREATE TABLE IF NOT EXISTS categories (
@@ -222,8 +222,8 @@ async function init() {
       category VARCHAR(255),
       description TEXT,
       quantity INT NOT NULL DEFAULT 1,
-      created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+      created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP NOT NULL ,
       UNIQUE KEY unique_user_cart_key (user_id, cart_key),
       CONSTRAINT fk_cart_items_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
     );
@@ -238,7 +238,7 @@ async function init() {
       product_name VARCHAR(255) NOT NULL,
       price DECIMAL(10,2) NOT NULL,
       quantity INT NOT NULL,
-      created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
       CONSTRAINT fk_cart_activity_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
     );
 
@@ -248,7 +248,7 @@ async function init() {
       order_number VARCHAR(100) NOT NULL UNIQUE,
       total DECIMAL(10,2) NOT NULL,
       status VARCHAR(100) NOT NULL DEFAULT 'Pending',
-      created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
       CONSTRAINT fk_orders_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
     );
 
@@ -263,7 +263,7 @@ async function init() {
       image TEXT,
       category VARCHAR(255),
       quantity INT NOT NULL,
-      created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
       CONSTRAINT fk_order_items_order FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE,
       CONSTRAINT fk_order_items_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
     );
@@ -285,14 +285,14 @@ async function init() {
     await exec(`ALTER TABLE users ADD COLUMN password VARCHAR(255) NOT NULL DEFAULT ''`);
   }
   if (!(await columnExists('cart_items', 'updated_at'))) {
-    await exec(`ALTER TABLE cart_items ADD COLUMN updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP`);
+    await exec(`ALTER TABLE cart_items ADD COLUMN updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP`);
     await exec(`UPDATE cart_items SET updated_at = created_at`);
   }
   if (!(await columnExists('cart_activity', 'created_at'))) {
-    await exec(`ALTER TABLE cart_activity ADD COLUMN created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP`);
+    await exec(`ALTER TABLE cart_activity ADD COLUMN created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP`);
   }
   if (!(await columnExists('orders', 'created_at'))) {
-    await exec(`ALTER TABLE orders ADD COLUMN created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP`);
+    await exec(`ALTER TABLE orders ADD COLUMN created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP`);
   }
   if (!(await columnExists('order_items', 'user_id'))) {
     await exec(`ALTER TABLE order_items ADD COLUMN user_id INT`);
@@ -304,7 +304,7 @@ async function init() {
     await exec(`ALTER TABLE order_items MODIFY user_id INT NOT NULL`);
   }
   if (!(await columnExists('order_items', 'created_at'))) {
-    await exec(`ALTER TABLE order_items ADD COLUMN created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP`);
+    await exec(`ALTER TABLE order_items ADD COLUMN created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP`);
   }
 
   await ensureAutoIncrementId('users');
