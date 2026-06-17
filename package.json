@@ -1,0 +1,19 @@
+{
+  "name": "nutritionxp",
+  "version": "1.0.0",
+  "description": "NutritionXP supplement store with user accounts and per-user carts",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "import-products": "node import-products.js --force"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "express": "^4.21.2",
+    "express-session": "^1.18.1",
+    "mysql2": "^3.22.5",
+    "xlsx": "^0.18.5"
+  }
+}

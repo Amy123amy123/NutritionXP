@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shop Categories - NutritionXP</title>
+    <link rel="stylesheet" href="abc.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<style>
+  
+    /* GALLERY */
+    .gallery {--size: 100px;display: grid;grid-template-columns: repeat(6, var(--size));grid-auto-rows: var(--size);margin-bottom: var(--size);place-items: start center;gap: 5px;margin-top:40px;}
+    .gallery:has(:hover) img:not(:hover),.gallery:has(:focus) img:not(:focus){filter: brightness(0.5) contrast(0.5);}
+    .gallery img {object-fit: cover;width: calc(var(--size) * 2);height: calc(var(--size) * 2);clip-path: path("M90,10 C100,0 100,0 110,10 190,90 190,90 190,90 200,100 200,100 190,110 190,110 110,190 110,190 100,200 100,200 90,190 90,190 10,110 10,110 0,100 0,100 10,90Z");transition: clip-path 0.25s, filter 0.75s;grid-column: auto / span 2;border-radius: 5px;}
+    .gallery img:nth-child(5n - 1) { grid-column: 2 / span 2 }
+    .gallery img:hover,.gallery img:focus {clip-path: path("M0,0 C0,0 200,0 200,0 200,0 200,100 200,100 200,100 200,200 200,200 200,200 100,200 100,200 100,200 100,200 0,200 0,200 0,100 0,100 0,100 0,100 0,100Z");z-index: 1;transition: clip-path 0.25s, filter 0.25s;}
+    .gallery img:focus {outline: 1px dashed black;outline-offset: -5px;}
+    .gallerysection{display: flex;justify-content: center;}
+
+</style>
+<body data-shop-mode="brand">
+    <!-- HEADER -->
+  <header class="container">
+    <div class="headerimg">
+      <img src="https://instasize.com/api/image/b0e2426687abd8cb722c1532731ddab8925659a72793c6f6c6bd7e1fa1f1c8f3.png">
+    </div>
+    
+    <nav>
+      <input type="text"placeholder = "search">
+      <a href="index.html">Home</a>
+      <!-- <div ><a href="#" onclick="scrollToSection('products')">Shop</a></div> -->
+    
+      <select  style="background:rgba(11,11,15,.95);
+   color: white; width: 59px; border: none;font-size: 15px;">
+           <option >Shop</option>
+            <option> <a href="#" onclick="scrollToSection('categories'); closeMobileMenu();">
+            <i class="fas fa-bullseye"></i> Shop by category
+          </a>
+          ></option>
+            <option><a href="#" onclick="scrollToSection('categories'); closeMobileMenu();">
+            <i class="fas fa-info-circle"></i> Shop by brand
+          </a></option>
+          </select>
+
+      
+      <a href="index.html" >Goals</a>
+      <a href="index.html" >About</a>
+      <a href="index.html?page=orders">Orders</a>
+      <a href="index.html" >Contact</a>
+    </nav>
+    
+    
+    <div class="header-actions">
+      <div class="auth-buttons" id="authButtons">
+        <button class="auth-btn login-btn" onclick="openAuthModal('login')">Login</button>
+        <button class="auth-btn signup-btn" onclick="openAuthModal('signup')">Sign Up</button>
+      </div>
+      <div class="user-menu" id="userMenu" style="display:none;">
+        <span class="user-greeting"><i class="fas fa-user-circle"></i> <span id="userDisplayName"></span></span>
+        <button class="auth-btn logout-btn" onclick="logoutUser()">Logout</button>
+      </div>
+      <div class="cart-icon-wrapper" onclick="goToCartPage()">
+        <i class="fas fa-shopping-cart cart-icon"></i>
+        <span class="cart-count" id="cartCount">0</span>
+      </div>
+      <div class="burger-menu" id="burgerMenu" onclick="toggleMobileMenu()">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+    </div>
+  </header>
+
+  <!-- MOBILE NAVIGATION -->
+  <div class="mobile-nav-overlay" id="mobileNavOverlay" onclick="closeMobileMenu()"></div>
+  <div class="mobile-nav" id="mobileNav">
+    <div class="mobile-nav-header">
+      <h3>Menu</h3>
+      <button class="mobile-nav-close" onclick="closeMobileMenu()">×</button>
+    </div>
+    <a href="index.html">
+      <i class="fas fa-home"></i> Home
+    </a>
+    <a href="#" onclick="scrollToSection('products'); closeMobileMenu();">
+      <i class="fas fa-shopping-bag"></i> Shop
+    </a>
+    <a href="#" onclick="scrollToSection('categories'); closeMobileMenu();">
+      <i class="fas fa-bullseye"></i> Goals
+    </a>
+    <a href="#" onclick="scrollToSection('about'); closeMobileMenu();">
+      <i class="fas fa-info-circle"></i> About
+    </a>
+    <a href="index.html?page=orders" onclick="closeMobileMenu();">
+      <i class="fas fa-receipt"></i> Orders
+    </a>
+    <a href="index.html#contact">Contact</a>
+    <div id="mobileAuthSection"></div>
+    <a href="index.html?page=cart" onclick="closeMobileMenu();" class="cart-mobile">
+      <span><i class="fas fa-shopping-cart"></i> View Cart</span>
+      <span class="cart-count" id="mobileCartCount">0</span>
+    </a>
+  </div>
+ 
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="page-header">
+            <h1>Category name</h1>
+            <div class="breadcrumb">
+                <a href="index.html">Home</a>
+                <span>/</span>
+                <span>Shop</span>
+            </div>
+        </div>
+
+        <div class="shop-container">
+            <!-- Filters Sidebar -->
+            <aside class="filters-sidebar">
+                <div class="filters-header">
+                    <h2>Filters</h2>
+                    <button class="clear-filters" onclick="clearAllFilters()">Clear All</button>
+                </div>
+
+                <!-- Category Filter -->
+                <div class="filter-group">
+                    <h3>Category</h3>
+                    <div class="filter-option">
+                        <input type="checkbox" id="protein" value="Protein" onchange="applyFilters()">
+                        <label for="protein">Protein Powder</label>
+                    </div>
+                    <div class="filter-option">
+                        <input type="checkbox" id="preworkout" value="Pre-Workout" onchange="applyFilters()">
+                        <label for="preworkout">Pre-Workout</label>
+                    </div>
+                    <div class="filter-option">
+                        <input type="checkbox" id="creatine" value="Creatine" onchange="applyFilters()">
+                        <label for="creatine">Creatine</label>
+                    </div>
+                    <div class="filter-option">
+                        <input type="checkbox" id="bcaa" value="BCAA" onchange="applyFilters()">
+                        <label for="bcaa">BCAA</label>
+                    </div>
+                    <div class="filter-option">
+                        <input type="checkbox" id="vitamins" value="Vitamins" onchange="applyFilters()">
+                        <label for="vitamins">Vitamins</label>
+                    </div>
+                    <div class="filter-option">
+                        <input type="checkbox" id="fatburner" value="Fat Burner" onchange="applyFilters()">
+                        <label for="fatburner">Fat Burner</label>
+                    </div>
+                </div>
+
+                <!-- Price Range Filter -->
+                <div class="filter-group">
+                    <h3>Price Range</h3>
+                    <div class="price-inputs">
+                        <div class="price-input">
+                            <label>Min</label>
+                            <input type="number" id="minPrice" value="0" min="0" max="5000" onchange="applyFilters()">
+                        </div>
+                        <div class="price-input">
+                            <label>Max</label>
+                            <input type="number" id="maxPrice" value="5000" min="0" max="5000" onchange="applyFilters()">
+                        </div>
+                    </div>
+                    <div class="range-slider">
+                        <div class="range-progress" id="rangeProgress"></div>
+                        <input type="range" id="rangeMin" min="0" max="5000" value="0" oninput="updatePriceRange()">
+                        <input type="range" id="rangeMax" min="0" max="5000" value="5000" oninput="updatePriceRange()">
+                    </div>
+                </div>
+
+                <!-- Rating Filter -->
+                <div class="filter-group">
+                    <h3>Rating</h3>
+                    <div class="rating-filter">
+                        <div class="rating-option">
+                            <input type="radio" name="rating" id="rating5" value="5" onchange="applyFilters()">
+                            <label for="rating5">
+                                <span class="stars">★★★★★</span> & Up
+                            </label>
+                        </div>
+                        <div class="rating-option">
+                            <input type="radio" name="rating" id="rating4" value="4" onchange="applyFilters()">
+                            <label for="rating4">
+                                <span class="stars">★★★★</span> & Up
+                            </label>
+                        </div>
+                        <div class="rating-option">
+                            <input type="radio" name="rating" id="rating3" value="3" onchange="applyFilters()">
+                            <label for="rating3">
+                                <span class="stars">★★★</span> & Up
+                            </label>
+                        </div>
+                        <div class="rating-option">
+                            <input type="radio" name="rating" id="rating-all" value="0" checked onchange="applyFilters()">
+                            <label for="rating-all">All Ratings</label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Discount Filter -->
+                <div class="filter-group">
+                    <h3>Discount</h3>
+                    <div class="filter-option">
+                        <input type="checkbox" id="discount50" value="50" onchange="applyFilters()">
+                        <label for="discount50">50% or more</label>
+                    </div>
+                    <div class="filter-option">
+                        <input type="checkbox" id="discount40" value="40" onchange="applyFilters()">
+                        <label for="discount40">40% or more</label>
+                    </div>
+                    <div class="filter-option">
+                        <input type="checkbox" id="discount30" value="30" onchange="applyFilters()">
+                        <label for="discount30">30% or more</label>
+                    </div>
+                    <div class="filter-option">
+                        <input type="checkbox" id="discount20" value="20" onchange="applyFilters()">
+                        <label for="discount20">20% or more</label>
+                    </div>
+                    <div class="filter-option">
+                        <input type="checkbox" id="discount10" value="10" onchange="applyFilters()">
+                        <label for="discount10">10% or more</label>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Products Section -->
+            <section class="products-section">
+                <div class="products-header">
+                    <div class="results-count" id="resultsCount">Showing 0 products</div>
+                    <select class="sort-dropdown" id="sortDropdown" onchange="applyFilters()">
+                        <option value="default">Sort by: Default</option>
+                        <option value="price-low">Price: Low to High</option>
+                        <option value="price-high">Price: High to Low</option>
+                        <option value="rating">Highest Rating</option>
+                        <option value="name">Name: A to Z</option>
+                    </select>
+                </div>
+
+                <div class="products-grid" id="productsGrid">
+                    <!-- Products will be dynamically loaded here -->
+                </div>
+            </section>
+        </div>
+    </main>
+
+  <!-- FOOTER -->
+    <footer class="footer" id="contact">
+      <div class="footer-grid">
+        <div>
+          <h3>Contact Us</h3>
+          <div class="contact-icons">
+            <i class="fab fa-x-twitter"></i>
+            <i class="fab fa-linkedin-in"></i>
+            <i class="fab fa-youtube"></i>
+            <i class="fab fa-twitch"></i>
+          </div>
+          <div class="contact-item"><i class="fa fa-phone"></i>7973079323</div>
+          <div class="contact-item"><i class="fa fa-phone"></i>nutritionxpmohali@gmail.com</div>
+          <div class="contact-item"><i class="fa fa-location-dot"></i> SCF 13, 1st Floor, Sector 64<br>Phase 10, Mohali - 160064</div>
+          <div class="logo">
+            <div class="logo-box">
+              <img src="https://instasize.com/api/image/b0e2426687abd8cb722c1532731ddab8925659a72793c6f6c6bd7e1fa1f1c8f3.png">
+            </div>
+          </div>
+        </div>
+        <div>
+          <h3>Quick Links</h3>
+          <div class="quick-links">
+            <a href="#" onclick="showPage('home')">Home</a>
+            <a href="#">Gallery</a>
+            <a href="#">About</a>
+            <a href="#">Terms & Conditions</a>
+            <a href="#">Policies</a>
+          </div>
+        </div>
+        <div class="form">
+          <h3>Send Us A Message</h3>
+          <small>Kindly fill this form. Average response is within 24hrs</small>
+          <input type="text" placeholder="Jane Smith">
+          <input type="email" placeholder="jane@framer.com">
+          <select>
+            <option>Select...</option>
+            <option>Support</option>
+            <option>Sales</option>
+          </select>
+          <textarea rows="3" placeholder="jane@framer.com"></textarea>
+          <button>Submit</button>
+        </div>
+      </div>
+    </footer>
+
+  <div id="auth-modal-mount"></div>
+
+<script src="api.js"></script>
+<script src="products.js"></script>
+<script src="auth.js"></script>
+<script src="script.js"></script>
+<script src="shop-page.js"></script>
+
+</body>
+</html>

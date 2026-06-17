@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NutritionXP – Zym Products</title>
+  <link rel="stylesheet" href="abc.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css">
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+  <script type="text/javascript">
+    
+    // EmailJS initialization (optional - for automatic email sending)
+    // Get your public key from https://dashboard.emailjs.com/admin/account
+    // Replace 'YOUR_PUBLIC_KEY' with your actual key
+    (function() {
+      // Uncomment and add your key when you set up EmailJS
+       emailjs.init("5r-xHkvi726k1ATBN");
+    })();
+  </script>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header class="container">
+    <div class="headerimg">
+      <img src="https://instasize.com/api/image/b0e2426687abd8cb722c1532731ddab8925659a72793c6f6c6bd7e1fa1f1c8f3.png">
+    </div>
+    
+    <nav>
+      <input type="text"placeholder = "search">
+      <a href="#" onclick="showPage('home')">Home</a>
+      <!-- <div ><a href="#" onclick="scrollToSection('products')">Shop</a></div> -->
+    
+      <select  style="background:rgba(11,11,15,.95);
+   color: white; width: 59px; border: none;font-size: 15px;">
+           <option >Shop</option>
+            <option> <a href="#" onclick="scrollToSection('categories'); closeMobileMenu();">
+            <i class="fas fa-bullseye"></i> Shop by category
+          </a>
+          ></option>
+            <option><a href="#" onclick="scrollToSection('categories'); closeMobileMenu();">
+            <i class="fas fa-info-circle"></i> Shop by brand
+          </a></option>
+          </select>
+
+      
+      <a href="#" onclick="scrollToSection('categories')">Goals</a>
+      <a href="#" onclick="scrollToSection('about')">About</a>
+      <a href="#" onclick="showPage('orders'); return false;">Orders</a>
+      <a href="#" onclick="scrollToSection('contact')">Contact</a>
+    </nav>
+    
+    
+    <div class="header-actions">
+      <div class="auth-buttons" id="authButtons">
+        <button class="auth-btn login-btn" onclick="openAuthModal('login')">Login</button>
+        <button class="auth-btn signup-btn" onclick="openAuthModal('signup')">Sign Up</button>
+      </div>
+      <div class="user-menu" id="userMenu" style="display:none;">
+        <span class="user-greeting"><i class="fas fa-user-circle"></i> <span id="userDisplayName"></span></span>
+        <button class="auth-btn logout-btn" onclick="logoutUser()">Logout</button>
+      </div>
+      <div class="cart-icon-wrapper" onclick="showPage('cart')">
+        <i class="fas fa-shopping-cart cart-icon"></i>
+        <span class="cart-count" id="cartCount">0</span>
+      </div>
+      <div class="burger-menu" id="burgerMenu" onclick="toggleMobileMenu()">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+    </div>
+  </header>
+  
+  <!-- MOBILE NAVIGATION -->
+  <div class="mobile-nav-overlay" id="mobileNavOverlay" onclick="closeMobileMenu()"></div>
+  <div class="mobile-nav" id="mobileNav">
+    <div class="mobile-nav-header">
+      <h3>Menu</h3>
+      <button class="mobile-nav-close" onclick="closeMobileMenu()">×</button>
+    </div>
+    <a href="#" onclick="showPage('home'); closeMobileMenu();">
+      <i class="fas fa-home"></i> Home
+    </a>
+    <a href="#" onclick="scrollToSection('products'); closeMobileMenu();">
+      <i class="fas fa-shopping-bag"></i> Shop
+    </a>
+    <a href="#" onclick="scrollToSection('categories'); closeMobileMenu();">
+      <i class="fas fa-bullseye"></i> Goals
+    </a>
+    <a href="#" onclick="scrollToSection('about'); closeMobileMenu();">
+      <i class="fas fa-info-circle"></i> About
+    </a>
+    <a href="#" onclick="showPage('orders'); closeMobileMenu();">
+      <i class="fas fa-receipt"></i> Orders
+    </a>
+    <a href="#" onclick="scrollToSection('contact'); closeMobileMenu();">
+      <i class="fas fa-envelope"></i> Contact
+    </a>
+    <div id="mobileAuthSection"></div>
+    <a href="#" onclick="showPage('cart'); closeMobileMenu();" class="cart-mobile">
+      <span><i class="fas fa-shopping-cart"></i> View Cart</span>
+      <span class="cart-count" id="mobileCartCount">0</span>
+    </a>
+  </div>
+
+  <!-- HOME PAGE -->
+  <div id="homePage" class="page active">
+    <!-- HERO SECTION - ORIGINAL -->
+    <section class="section full-home d-flex align-items-center aman" data-overlay-dark="1" data-jarallax data-speed="0.2" data-type="scale" id="home">
+      <div class="vc-bg-lines light lines-animate">
+        <span class="border-1"></span>
+        <span class="border-2"></span>
+        <span class="border-3"></span>
+        <span class="border-4"></span>
+        <span class="border-5"></span>
+        <span class="border-6"></span>
+        <span class="border-7"></span>
+      </div>
+      <h3 style="text-align: center; margin-top: 100px; color: white; text-shadow: 5px 5px 10px black;font-size: 90px;">Delivering Only 100%</h3>
+      <h3 style="text-align: center; color: white; text-shadow: 5px 5px 10px black;font-size: 50px; margin-top: -20px;">Genuine Supplements</h3>
+    </section>
+
+    <!-- CARD VIEW: BEST SELLING PRODUCTS -->
+    <section class="section container" id="products">
+      <h2 style="text-align:center;">Best Selling Products</h2>
+      <div class="card-grid" id="bestSellers"></div>
+    </section>
+
+    <!-- GALLERY SECTION -->
+    <section class="section container aman2" style="text-align: center; background: radial-gradient(circle at top, #784b2b, #0b0f14);">
+      <h2>Product Gallery</h2>
+      <p>Real athletes. Real results. Real performance.</p>
+      
+      <section class="gallerysection">
+        <div class="container3 collage1">
+        <div class="grid-container3">
+            <div class="item12 item1">
+                <img src="https://images.unsplash.com/photo-1593095948071-474c5cc2989d?w=400" alt="img1"/>
+            </div>
+            <div class="item12 item2">
+                <img src="https://images.unsplash.com/photo-1579722820308-d74e571900a9?w=400" alt="img2"/>
+            </div>
+            <div class="item12 item3">
+                <img src="https://images.unsplash.com/photo-1571902943202-507ec2618e8f?w=400" alt="img3"/>
+            </div>
+            <div class="item12 item4">
+                <img src="https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=400" alt="img4"/>
+            </div>
+            <div class="item12 item5">
+                <img src="https://images.unsplash.com/photo-1599058945522-28d584b6f0ff?w=400" alt="img5"/>
+            </div>
+            <div class="item12 item6">
+                <img src="https://images.unsplash.com/photo-1579722820308-d74e571900a9?w=400" alt="img6"/>
+            </div>
+            <div class="item12 item7">
+                <img src="https://images.unsplash.com/photo-1593095948071-474c5cc2989d?w=400" alt="img7"/>
+            </div>
+        </div>
+      </div>
+        
+      </section>
+    </section>
+
+    <!-- SHOP BY CATEGORY -->
+    <section class="section container" id="categories">
+      <h2 style="text-align:center;">Shop by category</h2>
+      <div class="scroller" id="categoriesScroll"></div>
+    </section>
+
+    <!-- SEASON'S BESTSELLERS - ORIGINAL -->
+    <div class="container swiper " style="max-width: 1400px;"">
+      <h2 style="text-align: center;">Season's Bestsellers!</h2>
+      <div class="wrapper">
+        <div class="card-list swiper-wrapper" id="seasonBestsellers"></div>
+        <div class="swiper-pagination"></div>
+        <div class="swiper-slide-button swiper-button-prev"></div>
+        <div class="swiper-slide-button swiper-button-next"></div>
+      </div>
+    </div>
+
+    <!-- BRANDS SECTION - ORIGINAL -->
+    <section class="brand-section" id="brands">
+      <h2>Choose By Brands</h2>
+      <div class="brand-slider" id="slider"></div>
+    </section>
+
+    <!-- WHY CHOOSE US -->
+    <section class="why-choose" id="about">
+      <h2>Why Choose NutritionXP?</h2>
+      <div class="features">
+        <div class="feature">
+          <img src="https://cdn-icons-png.flaticon.com/512/679/679720.png" />
+          <h4>Freeshipping</h4>
+          <p>Free PAN India Shipping.</p>
+        </div>
+        <div class="feature">
+          <img src="https://cdn-icons-png.flaticon.com/512/747/747376.png" />
+          <h4>24/7 Friendly Support</h4>
+          <p>Our support team always ready for you 7 days a week.</p>
+        </div>
+        <div class="feature">
+          <img src="https://cdn-icons-png.flaticon.com/512/891/891462.png" />
+          <h4>7 Days Easy Exchange</h4>
+          <p>Product Exchange is Eligible Within 7 Days of Delivery.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="footer" id="contact">
+      <div class="footer-grid">
+        <div>
+          <h3>Contact Us</h3>
+          <div class="contact-icons">
+            <i class="fab fa-x-twitter"></i>
+            <i class="fab fa-linkedin-in"></i>
+            <i class="fab fa-youtube"></i>
+            <i class="fab fa-twitch"></i>
+          </div>
+          <div class="contact-item"><i class="fa fa-phone"></i>7973079323</div>
+          <div class="contact-item"><i class="fa fa-phone"></i>nutritionxpmohali@gmail.com</div>
+          <div class="contact-item"><i class="fa fa-location-dot"></i> SCF 13, 1st Floor, Sector 64<br>Phase 10, Mohali - 160064</div>
+          <div class="logo">
+            <div class="logo-box">
+              <img src="https://instasize.com/api/image/b0e2426687abd8cb722c1532731ddab8925659a72793c6f6c6bd7e1fa1f1c8f3.png">
+            </div>
+          </div>
+        </div>
+        <div>
+          <h3>Quick Links</h3>
+          <div class="quick-links">
+            <a href="#" onclick="showPage('home')">Home</a>
+            <a href="#">Gallery</a>
+            <a href="#">About</a>
+            <a href="#">Terms & Conditions</a>
+            <a href="#">Policies</a>
+          </div>
+        </div>
+        <div class="form">
+          <h3>Send Us A Message</h3>
+          <small>Kindly fill this form. Average response is within 24hrs</small>
+          <input type="text" placeholder="Jane Smith">
+          <input type="email" placeholder="jane@framer.com">
+          <select>
+            <option>Select...</option>
+            <option>Support</option>
+            <option>Sales</option>
+          </select>
+          <textarea rows="3" placeholder="jane@framer.com"></textarea>
+          <button>Submit</button>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <!-- PRODUCT DETAIL PAGE -->
+  <div id="detailPage" class="page">
+    <div class="product-detail-container">
+      <a class="back-btn" onclick="showPage('home')">
+        <i class="fas fa-arrow-left"></i> Back to Products
+      </a>
+      <div class="product-detail-grid">
+        <div>
+          <img id="detailImage" class="product-image-main" src="" alt="Product">
+        </div>
+        <div class="product-info">
+          <span id="detailCategory" class="product-category"></span>
+          <h1 id="detailName"></h1>
+          <div id="detailPrice" class="product-price"></div>
+          <p class="product-description" id="detailDescription"></p>
+          <ul class="product-features">
+            <li><i class="fas fa-check-circle"></i> 100% Authentic Product</li>
+            <li><i class="fas fa-check-circle"></i> Free Shipping on orders above ₹999</li>
+            <li><i class="fas fa-check-circle"></i> Easy 7-day return policy</li>
+            <li><i class="fas fa-check-circle"></i> Secure payment options</li>
+          </ul>
+          <div class="quantity-selector">
+            <span>Quantity:</span>
+            <button onclick="changeDetailQuantity(-1)">-</button>
+            <span id="detailQuantity">1</span>
+            <button onclick="changeDetailQuantity(1)">+</button>
+          </div>
+          <button class="add-to-cart-btn" onclick="addToCartFromDetail()">
+            <i class="fas fa-shopping-cart"></i> Add to Cart
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CART PAGE -->
+  <div id="cartPage" class="page">
+    <div class="cart-page-container">
+      <a class="back-btn" onclick="showPage('home')">
+        <i class="fas fa-arrow-left"></i> Continue Shopping
+      </a>
+      <h2 class="cart-page-title">Shopping Cart</h2>
+      <div id="cartPageContent"></div>
+    </div>
+  </div>
+
+  <!-- ORDER HISTORY PAGE -->
+  <div id="ordersPage" class="page">
+    <div class="order-history-container">
+      <a class="back-btn" onclick="showPage('home')">
+        <i class="fas fa-arrow-left"></i> Back to Home
+      </a>
+      <h2 class="order-history-title">Order History</h2>
+      <div id="orderHistoryContent"></div>
+    </div>
+  </div>
+
+  <!-- EMAIL NOTIFICATION POPUP -->
+  <div class="notification-overlay" id="notificationOverlay"></div>
+  <div class="notification-popup" id="notificationPopup">
+    <i class="fas fa-check-circle"></i>
+    <h3>Order Placed Successfully!</h3>
+    <p>Your order details have been sent to <strong>asb.asb.asbgfd@gmail.com</strong>. We will contact you shortly to confirm your order.</p>
+    <button class="card-button" onclick="closeNotification()" style="width:100%;padding:15px;">Continue Shopping</button>
+  </div>
+
+  <div id="auth-modal-mount"></div>
+
+  <!-- Linking Swiper script -->
+  <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+<script src="api.js"></script>
+<script src="products.js"></script>
+<script src="auth.js"></script>
+<script src="script.js"></script>
+
+  <script>
+    
+
+//category page script
+//category-products.js
+// Product Data
+
+
+    // Display Products
+    function displayProducts(products) {
+        const productsGrid = document.getElementById('productsGrid');
+        const resultsCount = document.getElementById('resultsCount');
+        
+        resultsCount.textContent = `Showing ${products.length} product${products.length !== 1 ? 's' : ''}`;
+        if (products.length === 0) {
+            productsGrid.innerHTML = `
+                <div class="no-products">
+                    <i class="fas fa-search"></i>
+                    <h3>No products found</h3>
+                    <p>Try adjusting your filters</p>
+                </div>
+            `;
+            return;
+        }
+        productsGrid.innerHTML = products.map(product => `
+            <div class="product-card">
+                <div class="product-image-container">
+                    <img src="${product.image}" alt="${product.name}" class="product-image">
+                    ${product.discount > 0 ? `<div class="discount-badge">-${product.discount}%</div>` : ''}
+                    
+                </div>
+                <div class="product-info">
+                    <div class="product-category">${product.category}</div>
+                    <h3 class="product-name">${product.name}</h3>
+                    <p class="product-description">${product.description}</p>
+                    <div class="product-rating">
+                        <span class="stars">${getStars(product.rating)}</span>
+                        <span class="rating-count">(${product.reviews})</span>
+                    </div>
+                    <div class="product-footer">
+                        <div class="product-price">
+                            <span class="price-current">$${product.price.toFixed(2)}</span>
+                            ${product.originalPrice ? `<span class="price-original">$${product.originalPrice.toFixed(2)}</span>` : ''}
+                        </div>
+                        <button class="add-to-cart-btn" onclick="addToCartFromDetail()">
+                            <i class="fas fa-cart-plus"></i>
+                            Add to Cart
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    // Apply Filters
+    function applyFilters() {
+        let filteredProducts = [...productsData];
+        // Category Filter
+        const categoryCheckboxes = document.querySelectorAll('#protein, #preworkout, #creatine, #bcaa, #vitamins, #fatburner');
+        const selectedCategories = Array.from(categoryCheckboxes)
+            .filter(cb => cb.checked)
+            .map(cb => cb.value);
+        
+        if (selectedCategories.length > 0) {
+            filteredProducts = filteredProducts.filter(p => selectedCategories.includes(p.category));
+        }
+        // Price Range Filter
+        const minPrice = parseFloat(document.getElementById('minPrice').value);
+        const maxPrice = parseFloat(document.getElementById('maxPrice').value);
+        filteredProducts = filteredProducts.filter(p => p.price >= minPrice && p.price <= maxPrice);
+        // Rating Filter
+        const selectedRating = document.querySelector('input[name="rating"]:checked')?.value || 0;
+        if (selectedRating > 0) {
+            filteredProducts = filteredProducts.filter(p => p.rating >= parseFloat(selectedRating));
+        }
+        // Discount Filter
+        const discountCheckboxes = document.querySelectorAll('#discount50, #discount40, #discount30, #discount20, #discount10');
+        const selectedDiscounts = Array.from(discountCheckboxes)
+            .filter(cb => cb.checked)
+            .map(cb => parseInt(cb.value));
+        
+        if (selectedDiscounts.length > 0) {
+            const minDiscount = Math.min(...selectedDiscounts);
+            filteredProducts = filteredProducts.filter(p => p.discount >= minDiscount);
+        }
+        // Sort Products
+        const sortValue = document.getElementById('sortDropdown').value;
+        switch(sortValue) {
+            case 'price-low':
+                filteredProducts.sort((a, b) => a.price - b.price);
+                break;
+            case 'price-high':
+                filteredProducts.sort((a, b) => b.price - a.price);
+                break;
+            case 'rating':
+                filteredProducts.sort((a, b) => b.rating - a.rating);
+                break;
+            case 'name':
+                filteredProducts.sort((a, b) => a.name.localeCompare(b.name));
+                break;
+        }
+        displayProducts(filteredProducts);
+    }
+
+
+    // Show Toast
+    function showToast(message) {
+        const existingToast = document.querySelector('.toast');
+        if (existingToast) {
+            existingToast.remove();
+        }
+        const toast = document.createElement('div');
+        toast.className = 'toast';
+        toast.innerHTML = `
+            <i class="fas fa-check-circle"></i>
+            <span>${message}</span>
+        `;
+        document.body.appendChild(toast);
+        setTimeout(() => {
+            toast.remove();
+        }, 3000);
+    }
+//main page script
+    let currentProduct = null;
+    let detailQuantity = 1;
+
+    function renderProducts() {
+      const container = document.getElementById('bestSellers');
+      if (!container) return;
+      const items = productsData.slice(0, 8);
+      container.innerHTML = items.map(p => `
+        <div class="card">
+          <img src="${p.image || getDefaultCategoryImage(p.name)}" alt="${p.name}">
+          <h3>${p.name}</h3>
+          <p class="price">₹${Math.round(p.price).toLocaleString()}</p>
+          <p style="color:${p.inStock ? '#4caf50' : '#ff4444'};font-size:13px;">${p.inStock ? 'In Stock' : 'Out of Stock'}</p>
+          <div style="margin-top: 20px;">
+            <a href="#" class="card-button" onclick="viewDetail(${p.id}); return false;">View Details</a>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function renderCategories() {
+      const container = document.getElementById('categoriesScroll');
+      if (!container) return;
+      container.innerHTML = categoriesData.map(c => `
+        <div class="scroll-card">
+          <img src="${c.image || getDefaultCategoryImage(c.name)}" alt="${c.name}">
+          <div style="height: 110px;">
+            <h3>${c.name}</h3>
+            <p>${c.description || (c.productCount ? c.productCount + ' products' : 'Shop now')}</p>
+          </div>
+          <div style="margin-top: 20px;">
+            <a href="index2.html?category=${encodeURIComponent(c.name)}" class="card-button">View More</a>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function renderSeasonBestsellers() {
+      const container = document.getElementById('seasonBestsellers');
+      if (!container) return;
+      container.innerHTML = productsData.slice(0, 6).map(p => `
+        <div class="card swiper-slide">
+          <div class="card-image">
+            <img src="${p.image || getDefaultCategoryImage(p.name)}" alt="${p.name}" />
+            <div class="card-tag">${p.category || p.brand || ''}</div>
+          </div>
+          <div class="card-content">
+            <h3 class="card-title">${p.name}</h3>
+            <p class="card-text">${p.description || p.variation || ''}</p>
+            <div class="card-footer">
+              <div class="card-profile">
+                <img src="https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=100" alt="User" />
+                <div class="card-profile-info">
+                  <span class="card-profile-name">₹${Math.round(p.price).toLocaleString()}</span>
+                  <span class="card-profile-role">${p.inStock ? 'In Stock' : 'Out of stock'}</span>
+                </div>
+              </div>
+              <a href="#" class="card-button" onclick="viewDetail(${p.id}); return false;">View More</a>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function renderBrands() {
+      const container = document.getElementById('slider');
+      if (!container) return;
+      container.innerHTML = brandsData.map((b) => `
+        <div class="brand-item">
+          <a href="index3.html?category=${encodeURIComponent(b.name)}">
+            <img src="${b.image || getDefaultBrandImage(b.name)}" alt="${b.name}">
+          </a>
+          <p>${b.name}</p>
+        </div>
+      `).join('');
+    }
+
+    function initHomePageProducts() {
+      renderProducts();
+      renderCategories();
+      renderSeasonBestsellers();
+      renderBrands();
+    }
+
+    // PAGE NAVIGATION
+    function showPage(pageName) {
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      if (pageName === 'home') {
+        document.getElementById('homePage').classList.add('active');
+      } else if (pageName === 'detail') {
+        document.getElementById('detailPage').classList.add('active');
+      } else if (pageName === 'cart') {
+        document.getElementById('cartPage').classList.add('active');
+        renderCartPage();
+        if (!isLoggedIn()) openAuthModal('login');
+      } else if (pageName === 'orders') {
+        if (typeof isLoggedIn === 'function' && !isLoggedIn()) {
+          openAuthModal('login');
+          showToast('Please log in to view your orders.');
+          return;
+        }
+        document.getElementById('ordersPage').classList.add('active');
+        renderOrderHistory();
+      }
+      window.scrollTo({top: 0, behavior: 'smooth'});
+    }
+
+    function scrollToSection(id) {
+      showPage('home');
+      setTimeout(() => {
+        const element = document.getElementById(id);
+        if (element) {
+          element.scrollIntoView({behavior: 'smooth', block: 'start'});
+        }
+      }, 100);
+     
+    }
+
+    // VIEW PRODUCT DETAIL
+    function viewDetail(productId) {
+      currentProduct = findProductById(productId);
+      if (!currentProduct) return;
+      
+      document.getElementById('detailImage').src = currentProduct.image || getDefaultCategoryImage(currentProduct.name);
+      document.getElementById('detailName').textContent = currentProduct.name;
+      document.getElementById('detailPrice').textContent = '₹' + Math.round(currentProduct.price).toLocaleString();
+      document.getElementById('detailCategory').textContent = (currentProduct.brand ? currentProduct.brand + ' · ' : '') + (currentProduct.category || '');
+      document.getElementById('detailDescription').textContent = currentProduct.description || currentProduct.variation || '';
+      detailQuantity = 1;
+      document.getElementById('detailQuantity').textContent = detailQuantity;
+      
+      showPage('detail');
+    }
+
+    // CHANGE QUANTITY IN DETAIL PAGE
+    function changeDetailQuantity(delta) {
+      detailQuantity = Math.max(1, detailQuantity + delta);
+      document.getElementById('detailQuantity').textContent = detailQuantity;
+    }
+
+    // ADD TO CART FROM DETAIL PAGE
+    async function addToCartFromDetail() {
+      if (!currentProduct) return;
+      if (!currentProduct.inStock) {
+        showToast(`${currentProduct.name} is out of stock.`);
+        return;
+      }
+      if (await addProductToCart(currentProduct, detailQuantity, 'home')) {
+        showPage('cart');
+      }
+    }
+
+
+    // BRAND SLIDER DRAG - ORIGINAL
+    const slider = document.getElementById("slider");
+    let isDown = false;
+    let startX;
+    let scrollLeft;
+
+    slider.addEventListener("mousedown", (e) => {
+      isDown = true;
+      slider.classList.add("active");
+      startX = e.pageX - slider.offsetLeft;
+      scrollLeft = slider.scrollLeft;
+    });
+
+    slider.addEventListener("mouseleave", () => {
+      isDown = false;
+    });
+
+    slider.addEventListener("mouseup", () => {
+      isDown = false;
+    });
+
+    slider.addEventListener("mousemove", (e) => {
+      if (!isDown) return;
+      e.preventDefault();
+      const x = e.pageX - slider.offsetLeft;
+      const walk = (x - startX) * 2;
+      slider.scrollLeft = scrollLeft - walk;
+    });
+
+    // INITIALIZE SWIPER - ORIGINAL
+    new Swiper(".wrapper", {
+      loop: true,
+      spaceBetween: 30,
+      autoplay: {
+        delay: 5000,
+        disableOnInteraction: false,
+        pauseOnMouseEnter: true,
+      },
+      pagination: {
+        el: ".swiper-pagination",
+        clickable: true,
+        dynamicBullets: true,
+      },
+      navigation: {
+        nextEl: ".swiper-button-next",
+        prevEl: ".swiper-button-prev",
+      },
+      breakpoints: {
+        0: {slidesPerView: 1},
+        768: {slidesPerView: 2},
+        1024: {slidesPerView: 3},
+      },
+    });
+
+    // INITIALIZE
+    window.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('notificationOverlay').addEventListener('click', closeNotification);
+    });
+
+    document.addEventListener('nutritionxp:products-ready', initHomePageProducts);
+
+    document.addEventListener('nutritionxp:ready', () => {
+      const pageParam = new URLSearchParams(window.location.search).get('page');
+      if (pageParam === 'cart' || window.location.hash === '#cart') {
+        showPage('cart');
+      } else if (pageParam === 'orders' || window.location.hash === '#orders') {
+        showPage('orders');
+      }
+    });
+  
+  </script>
+
+</body>
+</html>
