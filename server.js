@@ -49,11 +49,11 @@ function formatCartRow(row) {
     productId: row.product_id,
     source: row.source,
     name: row.name,
-    price: row.price,
+    price: Number(row.price) || 0,
     image: row.image,
     category: row.category,
     description: row.description,
-    quantity: row.quantity,
+    quantity: Number(row.quantity) || 0,
     updatedAt: row.updated_at
   };
 }
@@ -201,7 +201,7 @@ app.post('/api/cart', requireLogin, async (req, res) => {
   ).get(userId, cartKey);
 
   if (existing) {
-    const newQty = existing.quantity + qty;
+    const newQty = (Number(existing.quantity) || 0) + qty;
     await db.prepare(`
       UPDATE cart_items SET quantity = ?, updated_at = NOW() WHERE id = ?
     `).run(newQty, existing.id);
@@ -400,10 +400,10 @@ function formatProduct(row) {
     name: row.name,
     productLink: row.product_link || '',
     image: row.image || '',
-    originalPrice: row.original_price || row.price,
-    price: row.price,
-    discount: row.discount || 0,
-    quantity: row.quantity || 0,
+    originalPrice: Number(row.original_price || row.price) || 0,
+    price: Number(row.price) || 0,
+    discount: Number(row.discount) || 0,
+    quantity: Number(row.quantity) || 0,
     stockStatus: row.stock_status || (inStock ? 'In Stock' : 'Out of stock'),
     inStock,
     variation: row.variation || '',

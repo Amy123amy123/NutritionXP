@@ -316,6 +316,11 @@ async function init() {
   await ensureAutoIncrementId('orders');
   await ensureAutoIncrementId('order_items');
   await widenExistingColumns();
+  await exec(`
+    UPDATE users SET created_at = NOW() WHERE created_at IS NULL;
+    UPDATE cart_activity SET created_at = NOW() WHERE created_at IS NULL;
+    UPDATE orders SET created_at = NOW() WHERE created_at IS NULL;
+  `);
 }
 
 async function withTransaction(fn) {

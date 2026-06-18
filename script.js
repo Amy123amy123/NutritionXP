@@ -22,7 +22,7 @@ async function reloadCart() {
 
 function updateCartCount() {
   const count = isLoggedIn()
-    ? cart.reduce((sum, item) => sum + item.quantity, 0)
+    ? cart.reduce((sum, item) => sum + (Number(item.quantity) || 0), 0)
     : 0;
   const cartCountEl = document.getElementById('cartCount');
   const mobileCartCount = document.getElementById('mobileCartCount');
@@ -245,7 +245,7 @@ async function renderCartPage() {
         </div>
         <div class="cart-summary">
           <h3>Order Summary</h3>
-          <p>Total Items: ${cart.reduce((sum, item) => sum + item.quantity, 0)}</p>
+          <p>Total Items: ${cart.reduce((sum, item) => sum + (Number(item.quantity) || 0), 0)}</p>
           <div class="total-amount">₹${Math.round(total).toLocaleString()}</div>
           <button class="checkout-page-btn" onclick="checkout()">
             <i class="fas fa-lock"></i> Proceed to Checkout
@@ -261,7 +261,7 @@ async function updateCartQuantity(itemId, delta) {
     const item = cart.find(i => i.id === itemId);
     if (!item) return;
 
-    const newQty = Math.max(1, item.quantity + delta);
+    const newQty = Math.max(1, (Number(item.quantity) || 0) + delta);
     try {
       const data = await apiFetch(`/api/cart/${itemId}`, {
         method: 'PATCH',
