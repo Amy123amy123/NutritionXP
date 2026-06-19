@@ -29,27 +29,19 @@
     </div>
     
     <nav>
-      <input type="text"placeholder = "search">
-      <a href="#" onclick="showPage('home')">Home</a>
-      <!-- <div ><a href="#" onclick="scrollToSection('products')">Shop</a></div> -->
-    
-      <select  style="background:rgba(11,11,15,.95);
-   color: white; width: 59px; border: none;font-size: 15px;">
-           <option >Shop</option>
-            <option> <a href="#" onclick="scrollToSection('categories'); closeMobileMenu();">
-            <i class="fas fa-bullseye"></i> Shop by category
-          </a>
-          ></option>
-            <option><a href="#" onclick="scrollToSection('categories'); closeMobileMenu();">
-            <i class="fas fa-info-circle"></i> Shop by brand
-          </a></option>
-          </select>
-
-      
-      <a href="#" onclick="scrollToSection('categories')">Goals</a>
-      <a href="#" onclick="scrollToSection('about')">About</a>
+      <input type="text" placeholder="Search products">
+      <a href="#" onclick="showPage('home'); return false;">Home</a>
+      <div class="nav-dropdown">
+        <button class="nav-dropdown-toggle" type="button">Shop <i class="fas fa-chevron-down"></i></button>
+        <div class="nav-dropdown-menu">
+          <a href="#categories" onclick="scrollToSection('categories'); return false;"><i class="fas fa-layer-group"></i> Shop by Category</a>
+          <a href="#brands" onclick="scrollToSection('brands'); return false;"><i class="fas fa-tags"></i> Shop by Brand</a>
+        </div>
+      </div>
+      <a href="#why-choose" onclick="scrollToSection('why-choose'); return false;">Goals</a>
+      <a href="about.html">About</a>
       <a href="#" onclick="showPage('orders'); return false;">Orders</a>
-      <a href="#" onclick="scrollToSection('contact')">Contact</a>
+      <a href="#contact" onclick="scrollToSection('contact'); return false;">Contact</a>
     </nav>
     
     
@@ -84,13 +76,16 @@
     <a href="#" onclick="showPage('home'); closeMobileMenu();">
       <i class="fas fa-home"></i> Home
     </a>
-    <a href="#" onclick="scrollToSection('products'); closeMobileMenu();">
-      <i class="fas fa-shopping-bag"></i> Shop
-    </a>
     <a href="#" onclick="scrollToSection('categories'); closeMobileMenu();">
+      <i class="fas fa-layer-group"></i> Shop by Category
+    </a>
+    <a href="#" onclick="scrollToSection('brands'); closeMobileMenu();">
+      <i class="fas fa-tags"></i> Shop by Brand
+    </a>
+    <a href="#" onclick="scrollToSection('why-choose'); closeMobileMenu();">
       <i class="fas fa-bullseye"></i> Goals
     </a>
-    <a href="#" onclick="scrollToSection('about'); closeMobileMenu();">
+    <a href="about.html" onclick="closeMobileMenu();">
       <i class="fas fa-info-circle"></i> About
     </a>
     <a href="#" onclick="showPage('orders'); closeMobileMenu();">
@@ -124,9 +119,17 @@
     </section>
 
     <!-- CARD VIEW: BEST SELLING PRODUCTS -->
-    <section class="section container" id="products">
-      <h2 style="text-align:center;">Best Selling Products</h2>
-      <div class="card-grid" id="bestSellers"></div>
+    <section class="section container best-selling-section" id="products">
+      <div class="section-heading">
+        <span>Top picks</span>
+        <h2>Best Selling Products</h2>
+      </div>
+      <div class="best-sellers-swiper swiper">
+        <div class="swiper-wrapper" id="bestSellers"></div>
+        <div class="best-sellers-pagination swiper-pagination"></div>
+        <div class="best-sellers-prev swiper-button-prev"></div>
+        <div class="best-sellers-next swiper-button-next"></div>
+      </div>
     </section>
 
     <!-- GALLERY SECTION -->
@@ -188,7 +191,7 @@
     </section>
 
     <!-- WHY CHOOSE US -->
-    <section class="why-choose" id="about">
+    <section class="why-choose" id="why-choose">
       <h2>Why Choose NutritionXP?</h2>
       <div class="features">
         <div class="feature">
@@ -212,47 +215,49 @@
     <!-- FOOTER -->
     <footer class="footer" id="contact">
       <div class="footer-grid">
-        <div>
-          <h3>Contact Us</h3>
+        <div class="footer-brand">
+          <img src="https://instasize.com/api/image/b0e2426687abd8cb722c1532731ddab8925659a72793c6f6c6bd7e1fa1f1c8f3.png" alt="NutritionXP">
+          <p>Authentic supplements, smart guidance, and dependable support for every fitness goal.</p>
           <div class="contact-icons">
-            <i class="fab fa-x-twitter"></i>
-            <i class="fab fa-linkedin-in"></i>
-            <i class="fab fa-youtube"></i>
-            <i class="fab fa-twitch"></i>
-          </div>
-          <div class="contact-item"><i class="fa fa-phone"></i>7973079323</div>
-          <div class="contact-item"><i class="fa fa-phone"></i>nutritionxpmohali@gmail.com</div>
-          <div class="contact-item"><i class="fa fa-location-dot"></i> SCF 13, 1st Floor, Sector 64<br>Phase 10, Mohali - 160064</div>
-          <div class="logo">
-            <div class="logo-box">
-              <img src="https://instasize.com/api/image/b0e2426687abd8cb722c1532731ddab8925659a72793c6f6c6bd7e1fa1f1c8f3.png">
-            </div>
+            <a href="https://facebook.com" target="_blank" rel="noopener" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+            <a href="https://instagram.com" target="_blank" rel="noopener" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+            <a href="https://google.com/search?q=NutritionXP" target="_blank" rel="noopener" aria-label="Google"><i class="fab fa-google"></i></a>
+            <a href="https://youtube.com" target="_blank" rel="noopener" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
+            <a href="https://linkedin.com" target="_blank" rel="noopener" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
           </div>
         </div>
         <div>
-          <h3>Quick Links</h3>
+          <h3>Explore</h3>
           <div class="quick-links">
-            <a href="#" onclick="showPage('home')">Home</a>
-            <a href="#">Gallery</a>
-            <a href="#">About</a>
-            <a href="#">Terms & Conditions</a>
-            <a href="#">Policies</a>
+            <a href="#" onclick="showPage('home'); return false;">Home</a>
+            <a href="#categories" onclick="scrollToSection('categories'); return false;">Shop by Category</a>
+            <a href="#brands" onclick="scrollToSection('brands'); return false;">Shop by Brand</a>
+            <a href="about.html">About</a>
+            <a href="#" onclick="showPage('cart'); return false;">Cart</a>
+            <a href="#" onclick="showPage('orders'); return false;">Orders</a>
           </div>
+        </div>
+        <div>
+          <h3>Contact</h3>
+          <div class="contact-item"><i class="fa fa-phone"></i>7973079323</div>
+          <div class="contact-item"><i class="fa fa-envelope"></i>nutritionxpmohali@gmail.com</div>
+          <div class="contact-item"><i class="fa fa-location-dot"></i>SCF 13, 1st Floor, Sector 64, Phase 10, Mohali - 160064</div>
         </div>
         <div class="form">
           <h3>Send Us A Message</h3>
-          <small>Kindly fill this form. Average response is within 24hrs</small>
-          <input type="text" placeholder="Jane Smith">
-          <input type="email" placeholder="jane@framer.com">
+          <small>Average response is within 24 hours.</small>
+          <input type="text" placeholder="Your name">
+          <input type="email" placeholder="you@example.com">
           <select>
             <option>Select...</option>
             <option>Support</option>
             <option>Sales</option>
           </select>
-          <textarea rows="3" placeholder="jane@framer.com"></textarea>
+          <textarea rows="3" placeholder="Tell us what you need"></textarea>
           <button>Submit</button>
         </div>
       </div>
+      <div class="footer-bottom">NutritionXP 2026. Built for genuine nutrition and confident shopping.</div>
     </footer>
   </div>
 
@@ -457,21 +462,60 @@
     let currentProduct = null;
     let detailQuantity = 1;
 
+    function getFeaturedFallbackProducts() {
+      return [
+        { id: 'fallback-1', name: 'Whey Protein Performance Blend', price: 2499, category: 'Protein', inStock: true, description: 'Daily protein support for strength and recovery.', image: 'https://images.unsplash.com/photo-1579722820308-d74e571900a9?w=500' },
+        { id: 'fallback-2', name: 'Creatine Monohydrate Power', price: 1199, category: 'Creatine', inStock: true, description: 'Simple strength and power support for intense training.', image: 'https://images.unsplash.com/photo-1593095948071-474c5cc2989d?w=500' },
+        { id: 'fallback-3', name: 'Pre Workout Energy Formula', price: 1699, category: 'Pre-Workout', inStock: true, description: 'Focused energy for stronger workout sessions.', image: 'https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?w=500' },
+        { id: 'fallback-4', name: 'Daily Multivitamin Support', price: 899, category: 'Vitamins', inStock: true, description: 'Everyday wellness support for active routines.', image: 'https://images.unsplash.com/photo-1571902943202-507ec2618e8f?w=500' },
+      ];
+    }
+
     function renderProducts() {
       const container = document.getElementById('bestSellers');
       if (!container) return;
-      const items = productsData.slice(0, 8);
+      const items = productsData.length ? productsData.slice(0, 8) : getFeaturedFallbackProducts();
       container.innerHTML = items.map(p => `
-        <div class="card">
+        <div class="card swiper-slide best-seller-card">
           <img src="${p.image || getDefaultCategoryImage(p.name)}" alt="${p.name}">
           <h3>${p.name}</h3>
           <p class="price">₹${Math.round(p.price).toLocaleString()}</p>
           <p style="color:${p.inStock ? '#4caf50' : '#ff4444'};font-size:13px;">${p.inStock ? 'In Stock' : 'Out of Stock'}</p>
           <div style="margin-top: 20px;">
-            <a href="#" class="card-button" onclick="viewDetail(${p.id}); return false;">View Details</a>
+            <a href="#" class="card-button" onclick="${productsData.length ? `viewDetail(${p.id});` : `scrollToSection('categories');`} return false;">View Details</a>
           </div>
         </div>
       `).join('');
+      initBestSellerSlider();
+    }
+
+    let bestSellerSwiper = null;
+    function initBestSellerSlider() {
+      if (typeof Swiper === 'undefined') return;
+      if (bestSellerSwiper) bestSellerSwiper.destroy(true, true);
+      bestSellerSwiper = new Swiper('.best-sellers-swiper', {
+        loop: true,
+        spaceBetween: 24,
+        grabCursor: true,
+        autoplay: {
+          delay: 2600,
+          disableOnInteraction: false,
+          pauseOnMouseEnter: true,
+        },
+        pagination: {
+          el: '.best-sellers-pagination',
+          clickable: true,
+        },
+        navigation: {
+          nextEl: '.best-sellers-next',
+          prevEl: '.best-sellers-prev',
+        },
+        breakpoints: {
+          0: { slidesPerView: 1 },
+          640: { slidesPerView: 2 },
+          1024: { slidesPerView: 4 },
+        },
+      });
     }
 
     function renderCategories() {

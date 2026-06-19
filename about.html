@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>About NutritionXP</title>
+  <link rel="stylesheet" href="abc.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+  <header class="container">
+    <div class="headerimg">
+      <img src="https://instasize.com/api/image/b0e2426687abd8cb722c1532731ddab8925659a72793c6f6c6bd7e1fa1f1c8f3.png" alt="NutritionXP">
+    </div>
+
+    <nav>
+      <input type="text" placeholder="Search products">
+      <a href="index.html">Home</a>
+      <div class="nav-dropdown">
+        <button class="nav-dropdown-toggle" type="button">Shop <i class="fas fa-chevron-down"></i></button>
+        <div class="nav-dropdown-menu">
+          <a href="index.html#categories"><i class="fas fa-layer-group"></i> Shop by Category</a>
+          <a href="index.html#brands"><i class="fas fa-tags"></i> Shop by Brand</a>
+        </div>
+      </div>
+      <a href="index.html#why-choose">Goals</a>
+      <a href="about.html">About</a>
+      <a href="index.html?page=orders">Orders</a>
+      <a href="#contact">Contact</a>
+    </nav>
+
+    <div class="header-actions">
+      <div class="auth-buttons" id="authButtons">
+        <button class="auth-btn login-btn" onclick="openAuthModal('login')">Login</button>
+        <button class="auth-btn signup-btn" onclick="openAuthModal('signup')">Sign Up</button>
+      </div>
+      <div class="user-menu" id="userMenu" style="display:none;">
+        <span class="user-greeting"><i class="fas fa-user-circle"></i> <span id="userDisplayName"></span></span>
+        <button class="auth-btn logout-btn" onclick="logoutUser()">Logout</button>
+      </div>
+      <div class="cart-icon-wrapper" onclick="goToCartPage()">
+        <i class="fas fa-shopping-cart cart-icon"></i>
+        <span class="cart-count" id="cartCount">0</span>
+      </div>
+      <div class="burger-menu" id="burgerMenu" onclick="toggleMobileMenu()">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+    </div>
+  </header>
+
+  <div class="mobile-nav-overlay" id="mobileNavOverlay" onclick="closeMobileMenu()"></div>
+  <div class="mobile-nav" id="mobileNav">
+    <div class="mobile-nav-header">
+      <h3>Menu</h3>
+      <button class="mobile-nav-close" onclick="closeMobileMenu()">x</button>
+    </div>
+    <a href="index.html"><i class="fas fa-home"></i> Home</a>
+    <a href="index.html#categories" onclick="closeMobileMenu();"><i class="fas fa-layer-group"></i> Shop by Category</a>
+    <a href="index.html#brands" onclick="closeMobileMenu();"><i class="fas fa-tags"></i> Shop by Brand</a>
+    <a href="index.html#why-choose" onclick="closeMobileMenu();"><i class="fas fa-bullseye"></i> Goals</a>
+    <a href="about.html" onclick="closeMobileMenu();"><i class="fas fa-info-circle"></i> About</a>
+    <a href="index.html?page=orders" onclick="closeMobileMenu();"><i class="fas fa-receipt"></i> Orders</a>
+    <a href="#contact" onclick="closeMobileMenu();"><i class="fas fa-envelope"></i> Contact</a>
+    <div id="mobileAuthSection"></div>
+    <a href="index.html?page=cart" onclick="closeMobileMenu();" class="cart-mobile">
+      <span><i class="fas fa-shopping-cart"></i> View Cart</span>
+      <span class="cart-count" id="mobileCartCount">0</span>
+    </a>
+  </div>
+
+  <main>
+    <section class="about-hero">
+      <div>
+        <h1>About NutritionXP</h1>
+        <p>NutritionXP brings genuine supplements, trusted fitness essentials, and helpful support together for people who want results without confusion.</p>
+      </div>
+    </section>
+
+    <section class="about-content">
+      <div class="about-grid">
+        <article class="about-panel">
+          <i class="fas fa-shield-heart"></i>
+          <h2>Authentic Products</h2>
+          <p>Every product is selected with a focus on quality, originality, and practical use for real training goals.</p>
+        </article>
+        <article class="about-panel">
+          <i class="fas fa-dumbbell"></i>
+          <h2>Built For Goals</h2>
+          <p>Protein, pre-workout, creatine, vitamins, and wellness picks are organized so shoppers can find the right fit quickly.</p>
+        </article>
+        <article class="about-panel">
+          <i class="fas fa-headset"></i>
+          <h2>Helpful Support</h2>
+          <p>The team helps customers compare options, understand usage, and shop with confidence before and after checkout.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="review-section">
+      <h2>Company Reviews</h2>
+      <div class="review-grid">
+        <article class="review-card">
+          <i class="fas fa-star"></i>
+          <h3>Fast and Genuine</h3>
+          <p>Customers appreciate quick support, clean product guidance, and confidence that products are authentic.</p>
+        </article>
+        <article class="review-card">
+          <i class="fas fa-star"></i>
+          <h3>Easy To Choose</h3>
+          <p>The category and brand shopping flow makes it simple to find supplements for strength, recovery, and daily wellness.</p>
+        </article>
+        <article class="review-card">
+          <i class="fas fa-star"></i>
+          <h3>Reliable Service</h3>
+          <p>NutritionXP focuses on responsive communication, smooth ordering, and customer-friendly after-sales help.</p>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer" id="contact">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <img src="https://instasize.com/api/image/b0e2426687abd8cb722c1532731ddab8925659a72793c6f6c6bd7e1fa1f1c8f3.png" alt="NutritionXP">
+        <p>Authentic supplements, smart guidance, and dependable support for every fitness goal.</p>
+        <div class="contact-icons">
+          <a href="https://facebook.com" target="_blank" rel="noopener" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+          <a href="https://instagram.com" target="_blank" rel="noopener" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+          <a href="https://google.com/search?q=NutritionXP" target="_blank" rel="noopener" aria-label="Google"><i class="fab fa-google"></i></a>
+          <a href="https://youtube.com" target="_blank" rel="noopener" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
+          <a href="https://linkedin.com" target="_blank" rel="noopener" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+        </div>
+      </div>
+      <div>
+        <h3>Explore</h3>
+        <div class="quick-links">
+          <a href="index.html">Home</a>
+          <a href="index.html#categories">Shop by Category</a>
+          <a href="index.html#brands">Shop by Brand</a>
+          <a href="about.html">About</a>
+          <a href="index.html?page=cart">Cart</a>
+          <a href="index.html?page=orders">Orders</a>
+        </div>
+      </div>
+      <div>
+        <h3>Contact</h3>
+        <div class="contact-item"><i class="fa fa-phone"></i>7973079323</div>
+        <div class="contact-item"><i class="fa fa-envelope"></i>nutritionxpmohali@gmail.com</div>
+        <div class="contact-item"><i class="fa fa-location-dot"></i>SCF 13, 1st Floor, Sector 64, Phase 10, Mohali - 160064</div>
+      </div>
+      <div class="form">
+        <h3>Send Us A Message</h3>
+        <small>Average response is within 24 hours.</small>
+        <input type="text" placeholder="Your name">
+        <input type="email" placeholder="you@example.com">
+        <select>
+          <option>Select...</option>
+          <option>Support</option>
+          <option>Sales</option>
+        </select>
+        <textarea rows="3" placeholder="Tell us what you need"></textarea>
+        <button>Submit</button>
+      </div>
+    </div>
+    <div class="footer-bottom">NutritionXP 2026. Built for genuine nutrition and confident shopping.</div>
+  </footer>
+
+  <div id="auth-modal-mount"></div>
+
+  <script src="api.js"></script>
+  <script src="auth.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>

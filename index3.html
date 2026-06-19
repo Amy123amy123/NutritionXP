@@ -27,27 +27,19 @@
     </div>
     
     <nav>
-      <input type="text"placeholder = "search">
+      <input type="text" placeholder="Search products">
       <a href="index.html">Home</a>
-      <!-- <div ><a href="#" onclick="scrollToSection('products')">Shop</a></div> -->
-    
-      <select  style="background:rgba(11,11,15,.95);
-   color: white; width: 59px; border: none;font-size: 15px;">
-           <option >Shop</option>
-            <option> <a href="#" onclick="scrollToSection('categories'); closeMobileMenu();">
-            <i class="fas fa-bullseye"></i> Shop by category
-          </a>
-          ></option>
-            <option><a href="#" onclick="scrollToSection('categories'); closeMobileMenu();">
-            <i class="fas fa-info-circle"></i> Shop by brand
-          </a></option>
-          </select>
-
-      
-      <a href="index.html" >Goals</a>
-      <a href="index.html" >About</a>
+      <div class="nav-dropdown">
+        <button class="nav-dropdown-toggle" type="button">Shop <i class="fas fa-chevron-down"></i></button>
+        <div class="nav-dropdown-menu">
+          <a href="index.html#categories"><i class="fas fa-layer-group"></i> Shop by Category</a>
+          <a href="index.html#brands"><i class="fas fa-tags"></i> Shop by Brand</a>
+        </div>
+      </div>
+      <a href="index.html#why-choose">Goals</a>
+      <a href="about.html">About</a>
       <a href="index.html?page=orders">Orders</a>
-      <a href="index.html" >Contact</a>
+      <a href="#contact">Contact</a>
     </nav>
     
     
@@ -82,13 +74,16 @@
     <a href="index.html">
       <i class="fas fa-home"></i> Home
     </a>
-    <a href="#" onclick="scrollToSection('products'); closeMobileMenu();">
-      <i class="fas fa-shopping-bag"></i> Shop
+    <a href="index.html#categories" onclick="closeMobileMenu();">
+      <i class="fas fa-layer-group"></i> Shop by Category
     </a>
-    <a href="#" onclick="scrollToSection('categories'); closeMobileMenu();">
+    <a href="index.html#brands" onclick="closeMobileMenu();">
+      <i class="fas fa-tags"></i> Shop by Brand
+    </a>
+    <a href="index.html#why-choose" onclick="closeMobileMenu();">
       <i class="fas fa-bullseye"></i> Goals
     </a>
-    <a href="#" onclick="scrollToSection('about'); closeMobileMenu();">
+    <a href="about.html" onclick="closeMobileMenu();">
       <i class="fas fa-info-circle"></i> About
     </a>
     <a href="index.html?page=orders" onclick="closeMobileMenu();">
@@ -248,47 +243,49 @@
   <!-- FOOTER -->
     <footer class="footer" id="contact">
       <div class="footer-grid">
-        <div>
-          <h3>Contact Us</h3>
+        <div class="footer-brand">
+          <img src="https://instasize.com/api/image/b0e2426687abd8cb722c1532731ddab8925659a72793c6f6c6bd7e1fa1f1c8f3.png" alt="NutritionXP">
+          <p>Authentic supplements, smart guidance, and dependable support for every fitness goal.</p>
           <div class="contact-icons">
-            <i class="fab fa-x-twitter"></i>
-            <i class="fab fa-linkedin-in"></i>
-            <i class="fab fa-youtube"></i>
-            <i class="fab fa-twitch"></i>
-          </div>
-          <div class="contact-item"><i class="fa fa-phone"></i>7973079323</div>
-          <div class="contact-item"><i class="fa fa-phone"></i>nutritionxpmohali@gmail.com</div>
-          <div class="contact-item"><i class="fa fa-location-dot"></i> SCF 13, 1st Floor, Sector 64<br>Phase 10, Mohali - 160064</div>
-          <div class="logo">
-            <div class="logo-box">
-              <img src="https://instasize.com/api/image/b0e2426687abd8cb722c1532731ddab8925659a72793c6f6c6bd7e1fa1f1c8f3.png">
-            </div>
+            <a href="https://facebook.com" target="_blank" rel="noopener" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+            <a href="https://instagram.com" target="_blank" rel="noopener" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+            <a href="https://google.com/search?q=NutritionXP" target="_blank" rel="noopener" aria-label="Google"><i class="fab fa-google"></i></a>
+            <a href="https://youtube.com" target="_blank" rel="noopener" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
+            <a href="https://linkedin.com" target="_blank" rel="noopener" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
           </div>
         </div>
         <div>
-          <h3>Quick Links</h3>
+          <h3>Explore</h3>
           <div class="quick-links">
-            <a href="#" onclick="showPage('home')">Home</a>
-            <a href="#">Gallery</a>
-            <a href="#">About</a>
-            <a href="#">Terms & Conditions</a>
-            <a href="#">Policies</a>
+            <a href="index.html">Home</a>
+            <a href="index.html#categories">Shop by Category</a>
+            <a href="index.html#brands">Shop by Brand</a>
+            <a href="about.html">About</a>
+            <a href="index.html?page=cart">Cart</a>
+            <a href="index.html?page=orders">Orders</a>
           </div>
+        </div>
+        <div>
+          <h3>Contact</h3>
+          <div class="contact-item"><i class="fa fa-phone"></i>7973079323</div>
+          <div class="contact-item"><i class="fa fa-envelope"></i>nutritionxpmohali@gmail.com</div>
+          <div class="contact-item"><i class="fa fa-location-dot"></i>SCF 13, 1st Floor, Sector 64, Phase 10, Mohali - 160064</div>
         </div>
         <div class="form">
           <h3>Send Us A Message</h3>
-          <small>Kindly fill this form. Average response is within 24hrs</small>
-          <input type="text" placeholder="Jane Smith">
-          <input type="email" placeholder="jane@framer.com">
+          <small>Average response is within 24 hours.</small>
+          <input type="text" placeholder="Your name">
+          <input type="email" placeholder="you@example.com">
           <select>
             <option>Select...</option>
             <option>Support</option>
             <option>Sales</option>
           </select>
-          <textarea rows="3" placeholder="jane@framer.com"></textarea>
+          <textarea rows="3" placeholder="Tell us what you need"></textarea>
           <button>Submit</button>
         </div>
       </div>
+      <div class="footer-bottom">NutritionXP 2026. Built for genuine nutrition and confident shopping.</div>
     </footer>
 
   <div id="auth-modal-mount"></div>

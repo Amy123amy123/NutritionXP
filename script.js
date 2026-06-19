@@ -184,6 +184,14 @@ function getContinueShoppingAction() {
   return isMainPage ? "showPage('home')" : "window.location.href='index.html'";
 }
 
+function goToCartPage() {
+  if (typeof showPage === 'function' && document.getElementById('cartPage')) {
+    showPage('cart');
+    return;
+  }
+  window.location.href = 'index.html?page=cart';
+}
+
 // RENDER CART PAGE (single cart – only on index.html)
 async function renderCartPage() {
       const container = document.getElementById('cartPageContent');
