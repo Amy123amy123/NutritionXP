@@ -329,6 +329,59 @@ app.get('/api/orders', requireLogin, async (req, res) => {
   res.json({ success: true, orders: result });
 });
 
+// --- BUY NOW (single item, does NOT touch the cart) ---
+app.post('/api/buy-now', requireLogin, async (req, res) => {
+  const { productId, source, name, price, image, category, description, quantity } = req.body || {};
+
+  if (!productId || !name || price == null) {
+    return res.status(400).json({ success: false, message: 'Invalid product data.' });
+  }
+
+  const userId = req.session.userId;
+  const qty = Math.max(1, parseInt(quantity, 10) || 1);
+  const total = Number(price) * qty;
+  const orderNumber = 'ORD' + Date.now();
+
+  const insertOrder = db.prepare(
+    'INSERT INTO orders (user_id, order_number, total, created_at) VALUES (?, ?, ?, NOW())'
+  );
+  const insertItem = db.prepare(`
+    INSERT INTO order_items (order_id, user_id, product_id, source, name, price, image, category, quantity)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `);
+
+  const result = await db.withTransaction(async () => {
+    const order = await insertOrder.run(userId, orderNumber, total);
+    const orderId = order.lastInsertRowid;
+    await insertItem.run(
+      orderId, userId, productId, source || 'direct', name, Number(price),
+      image || '', category || '', qty
+    );
+    await logCartActivity(userId, 'buy_now', {
+      cartItemId: null,
+      productId,
+      source: source || 'direct',
+      productName: name,
+      price: Number(price),
+      quantity: qty
+    });
+    return { orderNumber, total, orderId };
+  });
+
+  res.json({
+    success: true,
+    message: 'Order placed successfully!',
+    order: {
+      orderNumber: result.orderNumber,
+      total: result.total,
+      date: new Date().toLocaleString(),
+      status: 'Pending',
+      items: [{ id: productId, name, price: Number(price), image: image || '', category: category || '', quantity: qty }]
+    }
+  });
+});
+
+// --- CHECKOUT (entire cart) ---
 app.post('/api/checkout', requireLogin, async (req, res) => {
   const userId = req.session.userId;
   const items = await db.prepare('SELECT * FROM cart_items WHERE user_id = ?').all(userId);

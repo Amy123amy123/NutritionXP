@@ -33,13 +33,12 @@ function displayProducts2(products) {
 
   productsGrid.innerHTML = products.map(product => `
     <div class="product-card shop-product-card">
-      <div class="product-image-container">
+      <div class="product-image-container" style="cursor:pointer;" onclick="window.location.href='index.html?page=detail&id=${product.id}&from=${encodeURIComponent(window.location.pathname + window.location.search)}'">
         <img src="${product.image || getDefaultCategoryImage(product.name)}" alt="${product.name}" class="product-image">
         ${product.discount > 0 ? `<div class="discount-badge">-${Math.round(product.discount)}%</div>` : ''}
         ${!product.inStock ? `<div class="discount-badge" style="background:#ff4444;top:auto;bottom:10px;">Out of Stock</div>` : ''}
       </div>
       <div class="product-info">
-        <div class="product-category">${product.brand ? product.brand + ' · ' : ''}${product.category || ''}</div>
         <h3 class="product-name">${product.name}</h3>
         <p class="product-description">${product.description || product.variation || ''}</p>
         <div class="product-rating">
@@ -51,9 +50,12 @@ function displayProducts2(products) {
             <span class="price-current">₹${Math.round(product.price).toLocaleString()}</span>
             ${product.originalPrice && product.originalPrice > product.price ? `<span class="price-original">₹${Math.round(product.originalPrice).toLocaleString()}</span>` : ''}
           </div>
-          <button class="add-to-cart-btn" onclick="addToCart(${product.id})" ${!product.inStock ? 'disabled style="opacity:0.5;cursor:not-allowed;"' : ''}>
-            <i class="fas fa-cart-plus"></i> ${product.inStock ? 'Add to Cart' : 'Out of Stock'}
-          </button>
+          <div style="display:flex; gap:6px; flex-wrap:wrap;">
+            <button class="add-to-cart-btn" onclick="addToCart(${product.id})" ${!product.inStock ? 'disabled style="opacity:0.5;cursor:not-allowed;"' : ''}>
+              <i class="fas fa-cart-plus"></i> ${product.inStock ? 'Add to Cart' : 'Out of Stock'}
+            </button>
+            ${product.inStock ? `<button class="buy-now-btn" onclick="buyNowFromShop(${product.id})"><i class='fas fa-bolt'></i> Buy Now</button>` : ''}
+          </div>
         </div>
       </div>
     </div>
@@ -151,3 +153,38 @@ document.addEventListener('nutritionxp:products-ready', initShopPage);
 document.addEventListener('DOMContentLoaded', () => {
   if (productsData.length > 0) initShopPage();
 });
+
+// BUY NOW from category/brand shop pages — cart is untouched
+async function buyNowFromShop(productId) {
+  const product = findProductById(productId) || productsData.find(p => p.id === productId);
+  if (!product) return;
+  if (!product.inStock) {
+    showToast(`${product.name} is out of stock.`);
+    return;
+  }
+  if (!isLoggedIn()) {
+    openAuthModal('login');
+    showToast('Please log in to continue.');
+    return;
+  }
+  try {
+    const result = await apiFetch('/api/buy-now', {
+      method: 'POST',
+      body: JSON.stringify({
+        productId: product.id,
+        source: 'shop',
+        name: product.name,
+        price: product.price,
+        image: product.image,
+        category: product.category,
+        description: product.description,
+        quantity: 1
+      })
+    });
+    if (typeof sendOrderEmail === 'function' && result.order) sendOrderEmail(result.order);
+    if (typeof showNotification === 'function') showNotification();
+    else showToast('Order placed successfully!');
+  } catch (err) {
+    showToast(err.message || 'Could not place order.');
+  }
+}

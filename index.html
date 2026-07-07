@@ -121,7 +121,6 @@
     <!-- CARD VIEW: BEST SELLING PRODUCTS -->
     <section class="section container best-selling-section" id="products">
       <div class="section-heading">
-        <span>Top picks</span>
         <h2>Best Selling Products</h2>
       </div>
       <div class="best-sellers-swiper swiper">
@@ -168,9 +167,17 @@
     </section>
 
     <!-- SHOP BY CATEGORY -->
-    <section class="section container" id="categories">
-      <h2 style="text-align:center;">Shop by category</h2>
-      <div class="scroller" id="categoriesScroll"></div>
+    <section class="section container best-selling-section categories-section" id="categories">
+      <div class="section-heading">
+        <span>Browse</span>
+        <h2>Shop by Category</h2>
+      </div>
+      <div class="categories-swiper swiper">
+        <div class="swiper-wrapper" id="categoriesScroll"></div>
+        <div class="categories-pagination swiper-pagination"></div>
+        <div class="categories-prev swiper-button-prev"></div>
+        <div class="categories-next swiper-button-next"></div>
+      </div>
     </section>
 
     <!-- SEASON'S BESTSELLERS - ORIGINAL -->
@@ -184,10 +191,17 @@
       </div>
     </div>
 
-    <!-- BRANDS SECTION - ORIGINAL -->
-    <section class="brand-section" id="brands">
-      <h2>Choose By Brands</h2>
-      <div class="brand-slider" id="slider"></div>
+    <!-- BRANDS SECTION -->
+    <section class="section brand-section brands-section-swiper" id="brands">
+      <div class="section-heading">
+        <h2>Choose By Brand</h2>
+      </div>
+      <div class="brands-swiper swiper">
+        <div class="swiper-wrapper" id="slider"></div>
+        <div class="brands-pagination swiper-pagination"></div>
+        <div class="brands-prev swiper-button-prev"></div>
+        <div class="brands-next swiper-button-next"></div>
+      </div>
     </section>
 
     <!-- WHY CHOOSE US -->
@@ -264,7 +278,7 @@
   <!-- PRODUCT DETAIL PAGE -->
   <div id="detailPage" class="page">
     <div class="product-detail-container">
-      <a class="back-btn" onclick="showPage('home')">
+      <a class="back-btn" onclick="goBackFromDetail()">
         <i class="fas fa-arrow-left"></i> Back to Products
       </a>
       <div class="product-detail-grid">
@@ -288,12 +302,65 @@
             <span id="detailQuantity">1</span>
             <button onclick="changeDetailQuantity(1)">+</button>
           </div>
-          <button class="add-to-cart-btn" onclick="addToCartFromDetail()">
-            <i class="fas fa-shopping-cart"></i> Add to Cart
-          </button>
+          <div class="detail-action-buttons">
+            <button class="add-to-cart-btn" onclick="addToCartFromDetail()">
+              <i class="fas fa-shopping-cart"></i> Add to Cart
+            </button>
+            <button class="buy-now-btn" onclick="buyNowFromDetail()">
+              <i class="fas fa-bolt"></i> Buy Now
+            </button>
+          </div>
         </div>
       </div>
     </div>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <img src="https://instasize.com/api/image/b0e2426687abd8cb722c1532731ddab8925659a72793c6f6c6bd7e1fa1f1c8f3.png" alt="NutritionXP">
+          <p>Authentic supplements, smart guidance, and dependable support for every fitness goal.</p>
+          <div class="contact-icons">
+            <a href="https://facebook.com" target="_blank" rel="noopener" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+            <a href="https://instagram.com" target="_blank" rel="noopener" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+            <a href="https://google.com/search?q=NutritionXP" target="_blank" rel="noopener" aria-label="Google"><i class="fab fa-google"></i></a>
+            <a href="https://youtube.com" target="_blank" rel="noopener" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
+            <a href="https://linkedin.com" target="_blank" rel="noopener" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+          </div>
+        </div>
+        <div>
+          <h3>Explore</h3>
+          <div class="quick-links">
+            <a href="#" onclick="showPage('home'); return false;">Home</a>
+            <a href="#" onclick="showPage('home'); scrollToSection('categories'); return false;">Shop by Category</a>
+            <a href="#" onclick="showPage('home'); scrollToSection('brands'); return false;">Shop by Brand</a>
+            <a href="about.html">About</a>
+            <a href="#" onclick="showPage('cart'); return false;">Cart</a>
+            <a href="#" onclick="showPage('orders'); return false;">Orders</a>
+          </div>
+        </div>
+        <div>
+          <h3>Contact</h3>
+          <div class="contact-item"><i class="fa fa-phone"></i>7973079323</div>
+          <div class="contact-item"><i class="fa fa-envelope"></i>nutritionxpmohali@gmail.com</div>
+          <div class="contact-item"><i class="fa fa-location-dot"></i>SCF 13, 1st Floor, Sector 64, Phase 10, Mohali - 160064</div>
+        </div>
+        <div class="form">
+          <h3>Send Us A Message</h3>
+          <small>Average response is within 24 hours.</small>
+          <input type="text" placeholder="Your name">
+          <input type="email" placeholder="you@example.com">
+          <select>
+            <option>Select...</option>
+            <option>Support</option>
+            <option>Sales</option>
+          </select>
+          <textarea rows="3" placeholder="Tell us what you need"></textarea>
+          <button>Submit</button>
+        </div>
+      </div>
+      <div class="footer-bottom">NutritionXP 2026. Built for genuine nutrition and confident shopping.</div>
+    </footer>
   </div>
 
   <!-- CART PAGE -->
@@ -335,6 +402,7 @@
 <script src="products.js"></script>
 <script src="auth.js"></script>
 <script src="script.js"></script>
+<script src="search.js"></script>
 
   <script>
     
@@ -477,12 +545,21 @@
       const items = productsData.length ? productsData.slice(0, 8) : getFeaturedFallbackProducts();
       container.innerHTML = items.map(p => `
         <div class="card swiper-slide best-seller-card">
-          <img src="${p.image || getDefaultCategoryImage(p.name)}" alt="${p.name}">
+          <img src="${p.image || getDefaultCategoryImage(p.name)}" alt="${p.name}"
+            style="cursor:pointer;"
+            onclick="${productsData.length ? `viewDetail(${p.id})` : `scrollToSection('categories')`}">
           <h3>${p.name}</h3>
           <p class="price">₹${Math.round(p.price).toLocaleString()}</p>
           <p style="color:${p.inStock ? '#4caf50' : '#ff4444'};font-size:13px;">${p.inStock ? 'In Stock' : 'Out of Stock'}</p>
-          <div style="margin-top: 20px;">
-            <a href="#" class="card-button" onclick="${productsData.length ? `viewDetail(${p.id});` : `scrollToSection('categories');`} return false;">View Details</a>
+          <div style="margin-top: 20px; display:flex; gap:8px; flex-wrap:wrap; justify-content:center;">
+            <!-- <a href="#" class="card-button" onclick="${productsData.length ? `viewDetail(${p.id});` : `scrollToSection('categories');`} return false;">View Details</a> -->
+             <div style="display:flex; gap:6px; align-items:center; flex-wrap:wrap;">
+                ${p.inStock
+                  ? `<button class="card-button season-cart-btn" onclick="addToCart(${p.id}); event.stopPropagation();"><i class="fas fa-cart-plus"></i> Add to Cart</button>`
+                  : `<span style="color:#ff4444;font-size:13px;font-weight:600;">Out of Stock</span>`
+                }
+              </div>
+            ${productsData.length && p.inStock ? `<a href="#" class="card-button buy-now-card-btn" onclick="buyNow(${p.id}); return false;"><i class='fas fa-bolt'></i> Buy Now</a>` : ''}
           </div>
         </div>
       `).join('');
@@ -518,21 +595,85 @@
       });
     }
 
+    let categoriesSwiper = null;
+    function initCategoriesSlider() {
+      if (typeof Swiper === 'undefined') return;
+      if (categoriesSwiper) categoriesSwiper.destroy(true, true);
+      categoriesSwiper = new Swiper('.categories-swiper', {
+        loop: true,
+        spaceBetween: 24,
+        grabCursor: true,
+        autoplay: {
+          delay: 3000,
+          disableOnInteraction: false,
+          pauseOnMouseEnter: true,
+        },
+        pagination: {
+          el: '.categories-pagination',
+          clickable: true,
+        },
+        navigation: {
+          nextEl: '.categories-next',
+          prevEl: '.categories-prev',
+        },
+        breakpoints: {
+          0: { slidesPerView: 1 },
+          480: { slidesPerView: 2 },
+          768: { slidesPerView: 3 },
+          1024: { slidesPerView: 4 },
+        },
+      });
+    }
+
+    let brandsSwiper = null;
+    function initBrandsSlider() {
+      if (typeof Swiper === 'undefined') return;
+      if (brandsSwiper) brandsSwiper.destroy(true, true);
+      brandsSwiper = new Swiper('.brands-swiper', {
+        loop: true,
+        spaceBetween: 28,
+        grabCursor: true,
+        autoplay: {
+          delay: 2800,
+          disableOnInteraction: false,
+          pauseOnMouseEnter: true,
+        },
+        pagination: {
+          el: '.brands-pagination',
+          clickable: true,
+        },
+        navigation: {
+          nextEl: '.brands-next',
+          prevEl: '.brands-prev',
+        },
+        breakpoints: {
+          0: { slidesPerView: 2 },
+          480: { slidesPerView: 3 },
+          768: { slidesPerView: 4 },
+          1024: { slidesPerView: 5 },
+          1280: { slidesPerView: 6 },
+        },
+      });
+    }
+
     function renderCategories() {
       const container = document.getElementById('categoriesScroll');
       if (!container) return;
       container.innerHTML = categoriesData.map(c => `
-        <div class="scroll-card">
-          <img src="${c.image || getDefaultCategoryImage(c.name)}" alt="${c.name}">
-          <div style="height: 110px;">
+        <div class="swiper-slide category-slide" onclick="window.location.href='index2.html?category=${encodeURIComponent(c.name)}'" style="cursor:pointer;">
+          <div class="category-slide-img-wrap">
+            <img src="${c.image || getDefaultCategoryImage(c.name)}" alt="${c.name}">
+            <div class="category-slide-overlay">
+              <span><i class="fas fa-arrow-right"></i> Shop Now</span>
+            </div>
+          </div>
+          <div class="category-slide-info">
             <h3>${c.name}</h3>
             <p>${c.description || (c.productCount ? c.productCount + ' products' : 'Shop now')}</p>
           </div>
-          <div style="margin-top: 20px;">
-            <a href="index2.html?category=${encodeURIComponent(c.name)}" class="card-button">View More</a>
-          </div>
         </div>
       `).join('');
+      initCategoriesSlider();
     }
 
     function renderSeasonBestsellers() {
@@ -541,7 +682,9 @@
       container.innerHTML = productsData.slice(0, 6).map(p => `
         <div class="card swiper-slide">
           <div class="card-image">
-            <img src="${p.image || getDefaultCategoryImage(p.name)}" alt="${p.name}" />
+            <img src="${p.image || getDefaultCategoryImage(p.name)}" alt="${p.name}"
+              style="cursor:pointer;"
+              onclick="viewDetail(${p.id})" />
             <div class="card-tag">${p.category || p.brand || ''}</div>
           </div>
           <div class="card-content">
@@ -555,7 +698,13 @@
                   <span class="card-profile-role">${p.inStock ? 'In Stock' : 'Out of stock'}</span>
                 </div>
               </div>
-              <a href="#" class="card-button" onclick="viewDetail(${p.id}); return false;">View More</a>
+              <div style="display:flex; gap:6px; align-items:center; flex-wrap:wrap;">
+                ${p.inStock
+                  ? `<button class="card-button season-cart-btn" onclick="addToCart(${p.id}); event.stopPropagation();"><i class="fas fa-cart-plus"></i> Add to Cart</button>
+                     <button class="card-button buy-now-card-btn season-cart-btn" onclick="buyNow(${p.id}); event.stopPropagation();"><i class="fas fa-bolt"></i> Buy Now</button>`
+                  : `<span style="color:#ff4444;font-size:13px;font-weight:600;">Out of Stock</span>`
+                }
+              </div>
             </div>
           </div>
         </div>
@@ -565,14 +714,18 @@
     function renderBrands() {
       const container = document.getElementById('slider');
       if (!container) return;
-      container.innerHTML = brandsData.map((b) => `
-        <div class="brand-item">
-          <a href="index3.html?category=${encodeURIComponent(b.name)}">
+      container.innerHTML = brandsData.map(b => `
+        <div class="swiper-slide brand-slide" onclick="window.location.href='index3.html?category=${encodeURIComponent(b.name)}'" style="cursor:pointer;">
+          <div class="brand-slide-img-wrap">
             <img src="${b.image || getDefaultBrandImage(b.name)}" alt="${b.name}">
-          </a>
+            <div class="brand-slide-overlay">
+              <span><i class="fas fa-arrow-right"></i> View Brand</span>
+            </div>
+          </div>
           <p>${b.name}</p>
         </div>
       `).join('');
+      initBrandsSlider();
     }
 
     function initHomePageProducts() {
@@ -617,9 +770,15 @@
     }
 
     // VIEW PRODUCT DETAIL
+    // detailSource tracks where to go back: 'home' (default) or the URL of the referring page
+    let detailSource = 'home';
+
     function viewDetail(productId) {
       currentProduct = findProductById(productId);
       if (!currentProduct) return;
+
+      // Track that we came from the home page (SPA navigation)
+      detailSource = 'home';
       
       document.getElementById('detailImage').src = currentProduct.image || getDefaultCategoryImage(currentProduct.name);
       document.getElementById('detailName').textContent = currentProduct.name;
@@ -646,39 +805,130 @@
         return;
       }
       if (await addProductToCart(currentProduct, detailQuantity, 'home')) {
-        showPage('cart');
+        showToast(`${currentProduct.name} added to cart!`);
       }
     }
 
+    // BUY NOW FROM DETAIL PAGE — orders just this item, cart is untouched
+    async function buyNowFromDetail() {
+      if (!currentProduct) return;
+      if (!currentProduct.inStock) {
+        showToast(`${currentProduct.name} is out of stock.`);
+        return;
+      }
+      if (!isLoggedIn()) {
+        openAuthModal('login');
+        showToast('Please log in to continue.');
+        return;
+      }
+      try {
+        const result = await apiFetch('/api/buy-now', {
+          method: 'POST',
+          body: JSON.stringify({
+            productId: currentProduct.id,
+            source: 'home',
+            name: currentProduct.name,
+            price: currentProduct.price,
+            image: currentProduct.image,
+            category: currentProduct.category,
+            description: currentProduct.description,
+            quantity: detailQuantity
+          })
+        });
+        if (result.order) sendOrderEmail(result.order);
+        showNotification();
+      } catch (err) {
+        showToast(err.message || 'Could not place order.');
+      }
+    }
 
-    // BRAND SLIDER DRAG - ORIGINAL
-    const slider = document.getElementById("slider");
-    let isDown = false;
-    let startX;
-    let scrollLeft;
+    // BUY NOW from any product card on home page — cart is untouched
+    async function buyNow(productId) {
+      const product = findProductById(productId);
+      if (!product) return;
+      if (!product.inStock) {
+        showToast(`${product.name} is out of stock.`);
+        return;
+      }
+      if (!isLoggedIn()) {
+        openAuthModal('login');
+        showToast('Please log in to continue.');
+        return;
+      }
+      try {
+        const result = await apiFetch('/api/buy-now', {
+          method: 'POST',
+          body: JSON.stringify({
+            productId: product.id,
+            source: 'home',
+            name: product.name,
+            price: product.price,
+            image: product.image,
+            category: product.category,
+            description: product.description,
+            quantity: 1
+          })
+        });
+        if (result.order) sendOrderEmail(result.order);
+        showNotification();
+      } catch (err) {
+        showToast(err.message || 'Could not place order.');
+      }
+    }
 
-    slider.addEventListener("mousedown", (e) => {
-      isDown = true;
-      slider.classList.add("active");
-      startX = e.pageX - slider.offsetLeft;
-      scrollLeft = slider.scrollLeft;
-    });
+    // Handle ?page=detail&id=X — used by category/brand pages to deep-link into detail
+    function handleDetailURLParam() {
+      const params = new URLSearchParams(window.location.search);
+      const page = params.get('page');
+      const id = params.get('id');
+      const from = params.get('from'); // e.g. "index2.html?category=Protein"
+      if (page === 'detail' && id) {
+        // Store back-destination so the back button returns to the right page
+        detailSource = from ? decodeURIComponent(from) : 'home';
 
-    slider.addEventListener("mouseleave", () => {
-      isDown = false;
-    });
+        const tryShow = () => {
+          const product = findProductById(parseInt(id, 10));
+          if (product) {
+            currentProduct = product;
+            document.getElementById('detailImage').src = product.image || getDefaultCategoryImage(product.name);
+            document.getElementById('detailName').textContent = product.name;
+            document.getElementById('detailPrice').textContent = '₹' + Math.round(product.price).toLocaleString();
+            document.getElementById('detailCategory').textContent = (product.brand ? product.brand + ' · ' : '') + (product.category || '');
+            document.getElementById('detailDescription').textContent = product.description || product.variation || '';
+            detailQuantity = 1;
+            document.getElementById('detailQuantity').textContent = detailQuantity;
+            showPage('detail');
+          } else if (productsData.length === 0) {
+            document.addEventListener('nutritionxp:products-ready', () => {
+              const p = findProductById(parseInt(id, 10));
+              if (p) {
+                currentProduct = p;
+                document.getElementById('detailImage').src = p.image || getDefaultCategoryImage(p.name);
+                document.getElementById('detailName').textContent = p.name;
+                document.getElementById('detailPrice').textContent = '₹' + Math.round(p.price).toLocaleString();
+                document.getElementById('detailCategory').textContent = (p.brand ? p.brand + ' · ' : '') + (p.category || '');
+                document.getElementById('detailDescription').textContent = p.description || p.variation || '';
+                detailQuantity = 1;
+                document.getElementById('detailQuantity').textContent = detailQuantity;
+                showPage('detail');
+              }
+            }, { once: true });
+          }
+        };
+        tryShow();
+      }
+    }
 
-    slider.addEventListener("mouseup", () => {
-      isDown = false;
-    });
+    // Back button on the detail page — goes back to wherever the user came from
+    function goBackFromDetail() {
+      if (detailSource === 'home') {
+        showPage('home');
+      } else {
+        window.location.href = detailSource;
+      }
+    }
 
-    slider.addEventListener("mousemove", (e) => {
-      if (!isDown) return;
-      e.preventDefault();
-      const x = e.pageX - slider.offsetLeft;
-      const walk = (x - startX) * 2;
-      slider.scrollLeft = scrollLeft - walk;
-    });
+    document.addEventListener('nutritionxp:ready', handleDetailURLParam);
 
     // INITIALIZE SWIPER - ORIGINAL
     new Swiper(".wrapper", {
