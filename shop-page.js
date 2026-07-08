@@ -76,15 +76,17 @@ function applyFilters() {
     }
   }
 
-  const categoryCheckboxes = document.querySelectorAll('#protein, #preworkout, #creatine, #bcaa, #vitamins, #fatburner');
-  const selectedCategories = Array.from(categoryCheckboxes)
-    .filter(cb => cb.checked)
-    .map(cb => cb.value);
+  const inStockEl = document.getElementById('inStock');
+  const outOfStockEl = document.getElementById('outOfStock');
+  const filterInStock = inStockEl ? inStockEl.checked : false;
+  const filterOutOfStock = outOfStockEl ? outOfStockEl.checked : false;
 
-  if (selectedCategories.length > 0) {
-    filteredProducts = filteredProducts.filter(p =>
-      selectedCategories.some(cat => matchesCategory(p.category, cat) || normalizeFilterValue(p.category).includes(normalizeFilterValue(cat)))
-    );
+  if (filterInStock || filterOutOfStock) {
+    filteredProducts = filteredProducts.filter(p => {
+      if (filterInStock && p.inStock) return true;
+      if (filterOutOfStock && !p.inStock) return true;
+      return false;
+    });
   }
 
   const minPriceEl = document.getElementById('minPrice');

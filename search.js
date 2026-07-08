@@ -33,9 +33,7 @@
 
   function navigateToProduct(productId) {
     if (isHomePage) {
-      if (typeof viewDetail === 'function') {
-        viewDetail(productId);
-      }
+      if (typeof viewDetail === 'function') viewDetail(productId);
     } else {
       const from = encodeURIComponent(window.location.pathname + window.location.search);
       window.location.href = 'index.html?page=detail&id=' + productId + '&from=' + from;
@@ -50,16 +48,11 @@
     window.location.href = 'index3.html?category=' + encodeURIComponent(brandName);
   }
 
-  /* When the user hits Enter (no suggestion selected), navigate to a full
-     search results page. On index2/index3 we pass the query as a URL param
-     and let the page filter. On index.html we show a synthetic search results
-     view inline. */
   function navigateSearch(query) {
     if (!query) return;
     if (isHomePage) {
       showSearchPage(query);
     } else {
-      // Redirect to index2 with a search query (category page handles it)
       window.location.href = 'index2.html?search=' + encodeURIComponent(query);
     }
   }
@@ -76,14 +69,8 @@
         norm(p.description).includes(q)
       );
 
-    // Reuse the detail page slot — swap content temporarily using a search page
     const detailPage = document.getElementById('detailPage');
     if (!detailPage) return;
-
-    // Store back source so back button works
-    if (typeof detailSource !== 'undefined') {
-      window.detailSourceBeforeSearch = detailSource;
-    }
 
     detailPage.innerHTML = `
       <div class="search-results-container">
@@ -92,7 +79,8 @@
         </a>
         <h2 style="margin-bottom:8px;">Search Results</h2>
         <p style="color:#b8a898;margin-bottom:32px;">
-          ${products.length} result${products.length !== 1 ? 's' : ''} for "<strong style="color:#FF7A1A;">${escapeHtml(query)}</strong>"
+          ${products.length} result${products.length !== 1 ? 's' : ''} for
+          "<strong style="color:#FF7A1A;">${escapeHtml(query)}</strong>"
         </p>
         ${products.length === 0
           ? `<div style="text-align:center;padding:60px 20px;">
@@ -115,7 +103,8 @@
                          <i class="fas fa-cart-plus"></i> Add to Cart
                        </button>
                        ${p.inStock
-                         ? `<button class="card-button buy-now-card-btn" onclick="event.stopPropagation();buyNow(${p.id})">
+                         ? `<button class="card-button buy-now-card-btn"
+                              onclick="event.stopPropagation();buyNow(${p.id})">
                               <i class="fas fa-bolt"></i> Buy Now
                             </button>`
                          : `<span style="color:#ff4444;font-size:13px;font-weight:600;align-self:center;">Out of Stock</span>`
@@ -133,39 +122,53 @@
   }
 
   window.closeSearchPage = function () {
-    const detailPage = document.getElementById('detailPage');
-    if (!detailPage) return;
-    // Restore original detail page HTML — reload page to restore cleanly
-    if (typeof goBackFromDetail === 'function') {
-      // Re-build detail page markup then go home
-      detailPage.innerHTML = window._detailPageOriginalHTML || '';
-      if (typeof showPage === 'function') showPage('home');
-    } else {
-      if (typeof showPage === 'function') showPage('home');
-    }
+    if (typeof showPage === 'function') showPage('home');
   };
+
+  /* ── single body-level dropdown shared across all inputs ── */
+
+  // One dropdown lives on <body> so it is never trapped inside a
+  // stacking context created by position:sticky / position:fixed headers.
+  const bodyDropdown = document.createElement('div');
+  bodyDropdown.className = 'search-dropdown';
+  bodyDropdown.setAttribute('role', 'listbox');
+  document.body.appendChild(bodyDropdown);
+
+  let activeInput    = null;   // which input currently owns the dropdown
+  let activeIndex    = -1;
+  let currentSuggestions = [];
+  let debounceTimer  = null;
+
+  /* Position the dropdown directly below whichever input is active */
+  function positionDropdown(input) {
+    const rect = input.getBoundingClientRect();
+    bodyDropdown.style.position = 'fixed';
+    bodyDropdown.style.top      = (rect.bottom + 6) + 'px';
+    bodyDropdown.style.left     = rect.left + 'px';
+    bodyDropdown.style.width    = Math.max(rect.width, 320) + 'px';
+    bodyDropdown.style.zIndex   = '999999';
+  }
+
+  /* Reposition on scroll / resize so dropdown tracks the input */
+  function onScrollResize() {
+    if (activeInput && bodyDropdown.classList.contains('open')) {
+      positionDropdown(activeInput);
+    }
+  }
+  window.addEventListener('scroll', onScrollResize, true);
+  window.addEventListener('resize', onScrollResize);
 
   /* ── build the dropdown ───────────────────────────── */
 
-  let activeIndex = -1;
-  let currentSuggestions = [];
-  let debounceTimer = null;
-
   function buildSuggestions(query) {
     const q = norm(query);
-    if (!q || q.length < 1) return [];
-
+    if (!q) return [];
     const suggestions = [];
 
-    // --- products (max 6) ---
     const products = typeof productsData !== 'undefined' ? productsData : [];
-    const matchedProducts = products.filter(p =>
-      norm(p.name).includes(q) ||
-      norm(p.brand).includes(q) ||
-      norm(p.category).includes(q)
-    ).slice(0, 6);
-
-    matchedProducts.forEach(p => {
+    products.filter(p =>
+      norm(p.name).includes(q) || norm(p.brand).includes(q) || norm(p.category).includes(q)
+    ).slice(0, 6).forEach(p => {
       suggestions.push({
         type: 'product',
         label: p.name,
@@ -177,46 +180,38 @@
       });
     });
 
-    // --- categories (max 3) ---
     const categories = typeof categoriesData !== 'undefined' ? categoriesData : [];
-    categories
-      .filter(c => norm(c.name).includes(q))
-      .slice(0, 3)
-      .forEach(c => {
-        suggestions.push({
-          type: 'category',
-          label: c.name,
-          sublabel: c.productCount ? c.productCount + ' products' : 'Browse category',
-          icon: 'fa-layer-group',
-          name: c.name
-        });
+    categories.filter(c => norm(c.name).includes(q)).slice(0, 3).forEach(c => {
+      suggestions.push({
+        type: 'category',
+        label: c.name,
+        sublabel: c.productCount ? c.productCount + ' products' : 'Browse category',
+        name: c.name
       });
+    });
 
-    // --- brands (max 3) ---
     const brands = typeof brandsData !== 'undefined' ? brandsData : [];
-    brands
-      .filter(b => norm(b.name).includes(q))
-      .slice(0, 3)
-      .forEach(b => {
-        suggestions.push({
-          type: 'brand',
-          label: b.name,
-          sublabel: b.productCount ? b.productCount + ' products' : 'Browse brand',
-          image: b.image || '',
-          name: b.name
-        });
+    brands.filter(b => norm(b.name).includes(q)).slice(0, 3).forEach(b => {
+      suggestions.push({
+        type: 'brand',
+        label: b.name,
+        sublabel: b.productCount ? b.productCount + ' products' : 'Browse brand',
+        image: b.image || '',
+        name: b.name
       });
+    });
 
     return suggestions;
   }
 
-  function renderDropdown(dropdown, suggestions, query) {
+  function renderDropdown(suggestions, query) {
     if (!suggestions.length) {
-      dropdown.innerHTML = `
+      bodyDropdown.innerHTML = `
         <div class="search-no-results">
-          <i class="fas fa-search"></i> No results for "<strong>${escapeHtml(query)}</strong>"
+          <i class="fas fa-search"></i>
+          No results for "<strong>${escapeHtml(query)}</strong>"
         </div>`;
-      dropdown.classList.add('open');
+      bodyDropdown.classList.add('open');
       return;
     }
 
@@ -224,7 +219,6 @@
     let lastType = null;
 
     suggestions.forEach((s, i) => {
-      // Section header
       if (s.type !== lastType) {
         const labels = { product: 'Products', category: 'Categories', brand: 'Brands' };
         html += `<div class="search-section-header">${labels[s.type]}</div>`;
@@ -235,10 +229,7 @@
         html += `
           <div class="search-item" data-index="${i}" role="option">
             <div class="search-item-img">
-              ${s.image
-                ? `<img src="${escapeHtml(s.image)}" alt="">`
-                : `<i class="fas fa-box"></i>`
-              }
+              ${s.image ? `<img src="${escapeHtml(s.image)}" alt="">` : `<i class="fas fa-box"></i>`}
             </div>
             <div class="search-item-text">
               <div class="search-item-name">${highlight(s.label, query)}</div>
@@ -249,9 +240,7 @@
       } else if (s.type === 'category') {
         html += `
           <div class="search-item" data-index="${i}" role="option">
-            <div class="search-item-icon">
-              <i class="fas fa-layer-group"></i>
-            </div>
+            <div class="search-item-icon"><i class="fas fa-layer-group"></i></div>
             <div class="search-item-text">
               <div class="search-item-name">${highlight(s.label, query)}</div>
               <div class="search-item-sub">${escapeHtml(s.sublabel)}</div>
@@ -264,8 +253,7 @@
             <div class="search-item-img">
               ${s.image
                 ? `<img src="${escapeHtml(s.image)}" alt="" style="border-radius:50%;">`
-                : `<i class="fas fa-tags"></i>`
-              }
+                : `<i class="fas fa-tags"></i>`}
             </div>
             <div class="search-item-text">
               <div class="search-item-name">${highlight(s.label, query)}</div>
@@ -277,13 +265,18 @@
     });
 
     html += `<div class="search-footer-hint">Press Enter to search all results</div>`;
-    dropdown.innerHTML = html;
-    dropdown.classList.add('open');
+    bodyDropdown.innerHTML = html;
+    bodyDropdown.classList.add('open');
 
-    // click handlers on items
-    dropdown.querySelectorAll('.search-item').forEach(el => {
+    bodyDropdown.querySelectorAll('.search-item').forEach(el => {
       el.addEventListener('mousedown', e => {
-        e.preventDefault(); // prevent blur before click fires
+        e.preventDefault();
+        const idx = parseInt(el.dataset.index, 10);
+        selectSuggestion(suggestions[idx]);
+      });
+      /* Touch devices — fire on touchend so the tap registers */
+      el.addEventListener('touchend', e => {
+        e.preventDefault();
         const idx = parseInt(el.dataset.index, 10);
         selectSuggestion(suggestions[idx]);
       });
@@ -292,36 +285,37 @@
 
   function selectSuggestion(s) {
     if (!s) return;
-    closeAllDropdowns();
-    if (s.type === 'product') navigateToProduct(s.id);
+    closeDropdown();
+    if (s.type === 'product')  navigateToProduct(s.id);
     else if (s.type === 'category') navigateToCategory(s.name);
-    else if (s.type === 'brand') navigateToBrand(s.name);
+    else if (s.type === 'brand')    navigateToBrand(s.name);
   }
 
-  function closeAllDropdowns() {
-    document.querySelectorAll('.search-dropdown').forEach(d => {
-      d.classList.remove('open');
-      d.innerHTML = '';
-    });
+  function closeDropdown() {
+    bodyDropdown.classList.remove('open');
+    bodyDropdown.innerHTML = '';
     activeIndex = -1;
     currentSuggestions = [];
+    activeInput = null;
+  }
+
+  function updateActive() {
+    const items = bodyDropdown.querySelectorAll('.search-item');
+    items.forEach((el, i) => {
+      el.classList.toggle('active', i === activeIndex);
+      if (i === activeIndex) el.scrollIntoView({ block: 'nearest' });
+    });
   }
 
   /* ── wire each search input ───────────────────────── */
 
   function setupSearchInput(input) {
-    // Wrap input in a relative-positioned container
+    // Minimal wrapper — only for the search-icon positioning, no z-index
     const wrapper = document.createElement('div');
     wrapper.className = 'search-wrapper';
     input.parentNode.insertBefore(wrapper, input);
     wrapper.appendChild(input);
 
-    const dropdown = document.createElement('div');
-    dropdown.className = 'search-dropdown';
-    dropdown.setAttribute('role', 'listbox');
-    wrapper.appendChild(dropdown);
-
-    // Add search icon inside wrapper
     const icon = document.createElement('i');
     icon.className = 'fas fa-search search-input-icon';
     wrapper.appendChild(icon);
@@ -337,30 +331,28 @@
       const q = input.value.trim();
       activeIndex = -1;
 
-      if (!q) {
-        closeAllDropdowns();
-        input.setAttribute('aria-expanded', 'false');
-        return;
-      }
+      if (!q) { closeDropdown(); input.setAttribute('aria-expanded', 'false'); return; }
 
       debounceTimer = setTimeout(() => {
+        activeInput = input;
         currentSuggestions = buildSuggestions(q);
-        renderDropdown(dropdown, currentSuggestions, q);
+        positionDropdown(input);
+        renderDropdown(currentSuggestions, q);
         input.setAttribute('aria-expanded', 'true');
       }, 120);
     });
 
     input.addEventListener('keydown', e => {
-      const items = dropdown.querySelectorAll('.search-item');
+      const items = bodyDropdown.querySelectorAll('.search-item');
 
       if (e.key === 'ArrowDown') {
         e.preventDefault();
         activeIndex = Math.min(activeIndex + 1, items.length - 1);
-        updateActive(items);
+        updateActive();
       } else if (e.key === 'ArrowUp') {
         e.preventDefault();
         activeIndex = Math.max(activeIndex - 1, -1);
-        updateActive(items);
+        updateActive();
       } else if (e.key === 'Enter') {
         e.preventDefault();
         if (activeIndex >= 0 && currentSuggestions[activeIndex]) {
@@ -368,61 +360,48 @@
           input.value = '';
         } else {
           const q = input.value.trim();
-          if (q) {
-            closeAllDropdowns();
-            input.value = '';
-            navigateSearch(q);
-          }
+          if (q) { closeDropdown(); input.value = ''; navigateSearch(q); }
         }
       } else if (e.key === 'Escape') {
-        closeAllDropdowns();
-        input.blur();
+        closeDropdown(); input.blur();
       }
     });
 
     input.addEventListener('blur', () => {
-      // Small delay so mousedown on item fires first
-      setTimeout(closeAllDropdowns, 180);
+      // Delay so mousedown/touchend on an item fires first
+      setTimeout(closeDropdown, 220);
       input.setAttribute('aria-expanded', 'false');
     });
 
     input.addEventListener('focus', () => {
       const q = input.value.trim();
       if (q && currentSuggestions.length) {
-        renderDropdown(dropdown, currentSuggestions, q);
+        activeInput = input;
+        positionDropdown(input);
+        renderDropdown(currentSuggestions, q);
       }
     });
   }
 
-  function updateActive(items) {
-    items.forEach((el, i) => {
-      el.classList.toggle('active', i === activeIndex);
-      if (i === activeIndex) el.scrollIntoView({ block: 'nearest' });
-    });
-  }
-
-  /* ── handle ?search= URL param on index2.html ─────── */
+  /* ── handle ?search= URL param on index2 / index3 ─── */
 
   function handleSearchParam() {
     if (isHomePage) return;
     const q = new URLSearchParams(window.location.search).get('search');
     if (!q) return;
 
-    // Wait for products to load then filter
     function applySearch() {
       if (typeof productsData === 'undefined' || !productsData.length) return;
-      const norm_q = norm(q);
+      const nq = norm(q);
       const filtered = productsData.filter(p =>
-        norm(p.name).includes(norm_q) ||
-        norm(p.brand).includes(norm_q) ||
-        norm(p.category).includes(norm_q)
+        norm(p.name).includes(nq) || norm(p.brand).includes(nq) || norm(p.category).includes(nq)
       );
       if (typeof displayProducts2 === 'function') {
         displayProducts2(filtered);
-        const header = document.querySelector('.page-header h1');
-        if (header) header.textContent = 'Search: ' + q;
-        const resultsCount = document.getElementById('resultsCount');
-        if (resultsCount) resultsCount.textContent = `${filtered.length} result${filtered.length !== 1 ? 's' : ''} for "${q}"`;
+        const h = document.querySelector('.page-header h1');
+        if (h) h.textContent = 'Search: ' + q;
+        const rc = document.getElementById('resultsCount');
+        if (rc) rc.textContent = `${filtered.length} result${filtered.length !== 1 ? 's' : ''} for "${q}"`;
       }
     }
 
@@ -433,23 +412,22 @@
   /* ── init ─────────────────────────────────────────── */
 
   function init() {
-    // Wire all nav search inputs
-    document.querySelectorAll('nav input[type="text"], nav input[placeholder*="Search"]').forEach(setupSearchInput);
+    document.querySelectorAll('nav input[type="text"], nav input[placeholder*="Search"]')
+      .forEach(setupSearchInput);
 
-    // Handle search URL param (index2 / index3)
+    const mobileInput = document.getElementById('mobileSearchInput');
+    if (mobileInput) setupSearchInput(mobileInput);
+
     handleSearchParam();
   }
 
-  // Run after DOM + products ready
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);
   } else {
     init();
   }
 
-  // Also re-run if products load after DOM (API-driven)
   document.addEventListener('nutritionxp:products-ready', () => {
-    // Refresh suggestions for any currently focused input
     const focused = document.activeElement;
     if (focused && focused.closest('.search-wrapper') && focused.value) {
       focused.dispatchEvent(new Event('input'));
