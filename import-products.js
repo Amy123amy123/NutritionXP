@@ -1,8 +1,10 @@
 const path = require('path');
+const fs   = require('fs');
 const XLSX = require('xlsx');
-const db = require('./database');
+const db   = require('./database');
 
 const EXCEL_FILE = path.join(__dirname, 'NutritionXP Website Product.xlsx');
+const IMAGES_DIR = path.join(__dirname, 'Images');
 
 function normalizeText(value) {
   return String(value || '').trim();
@@ -16,6 +18,19 @@ function parseNumber(value) {
 function isInStock(stockStatus) {
   const status = normalizeText(stockStatus).toLowerCase();
   return status.includes('in stock') && !status.includes('out');
+}
+
+// Return /Images/ProductName.ext if a local file exists, otherwise return the original URL.
+function resolveImage(productName, remoteUrl) {
+  const safeName = productName.trim().replace(/[\\/:*?"<>|]/g, '').replace(/\s+/g, ' ').substring(0, 120);
+  const exts = ['.jpg', '.jpeg', '.png', '.webp', '.gif'];
+  for (const ext of exts) {
+    const localPath = path.join(IMAGES_DIR, safeName + ext);
+    if (fs.existsSync(localPath)) {
+      return '/Images/' + safeName + ext;
+    }
+  }
+  return remoteUrl || '';
 }
 
 async function importFromExcel(force = false) {
@@ -69,11 +84,14 @@ async function importFromExcel(force = false) {
         ? `${brand}${brand ? ' – ' : ''}${variation}`
         : brand;
 
+      const imageUrl  = normalizeText(row['link of image']);
+      const localImage = resolveImage(name, imageUrl);
+
       await insertProduct.run(
         brand,
         name,
         normalizeText(row.Product),
-        normalizeText(row['link of image']),
+        localImage,
         parseNumber(row['original price']),
         parseNumber(row['our price']) || parseNumber(row['original price']),
         parseNumber(row['discount in %']),

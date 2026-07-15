@@ -598,6 +598,93 @@ app.post('/api/admin/import-products', async (req, res) => {
   }
 });
 
+// Download all product images from their URLs into the local /Images folder
+// and update the DB image column to use the local path.
+app.post('/api/admin/download-images', async (req, res) => {
+  const https = require('https');
+  const http  = require('http');
+  const fs    = require('fs');
+  const path  = require('path');
+  const url   = require('url');
+
+  const imagesDir = path.join(__dirname, 'Images');
+  if (!fs.existsSync(imagesDir)) fs.mkdirSync(imagesDir, { recursive: true });
+
+  // Sanitise a product name into a safe filename
+  function safeName(name) {
+    return name.trim().replace(/[\\/:*?"<>|]/g, '').replace(/\s+/g, ' ').substring(0, 120);
+  }
+
+  function extFromUrl(imageUrl) {
+    try {
+      const parsed = new url.URL(imageUrl);
+      const p = parsed.pathname.toLowerCase();
+      if (p.endsWith('.png'))  return '.png';
+      if (p.endsWith('.webp')) return '.webp';
+      if (p.endsWith('.gif'))  return '.gif';
+    } catch {}
+    return '.jpg';
+  }
+
+  function download(imageUrl, destPath) {
+    return new Promise((resolve, reject) => {
+      const proto = imageUrl.startsWith('https') ? https : http;
+      const file  = fs.createWriteStream(destPath);
+      proto.get(imageUrl, res => {
+        if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
+          file.close();
+          fs.unlink(destPath, () => {});
+          download(res.headers.location, destPath).then(resolve).catch(reject);
+          return;
+        }
+        if (res.statusCode !== 200) {
+          file.close();
+          fs.unlink(destPath, () => {});
+          reject(new Error(`HTTP ${res.statusCode}`));
+          return;
+        }
+        res.pipe(file);
+        file.on('finish', () => { file.close(); resolve(); });
+        file.on('error', err => { fs.unlink(destPath, () => {}); reject(err); });
+      }).on('error', err => { fs.unlink(destPath, () => {}); reject(err); });
+    });
+  }
+
+  const products = await db.prepare('SELECT id, name, image FROM products').all();
+  let updated = 0, skipped = 0, failed = 0;
+  const errors = [];
+
+  for (const p of products) {
+    const name = safeName(p.name);
+    if (!p.image) { skipped++; continue; }
+
+    // Already local
+    if (p.image.startsWith('/Images/')) { skipped++; continue; }
+
+    const ext      = extFromUrl(p.image);
+    const filename = name + ext;
+    const destPath = path.join(imagesDir, filename);
+    const localUrl = '/Images/' + filename;
+
+    // Skip download if file already exists
+    if (!fs.existsSync(destPath)) {
+      try {
+        await download(p.image, destPath);
+      } catch (err) {
+        failed++;
+        errors.push({ id: p.id, name: p.name, error: err.message });
+        continue;
+      }
+    }
+
+    // Update DB to point at local file
+    await db.prepare('UPDATE products SET image = ? WHERE id = ?').run(localUrl, p.id);
+    updated++;
+  }
+
+  res.json({ success: true, updated, skipped, failed, errors });
+});
+
 // Admin-style summary: view all users with cart + order counts (for your records)
 app.get('/api/admin/users-summary', async (req, res) => {
   const users = await db.prepare(`
