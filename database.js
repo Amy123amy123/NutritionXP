@@ -3,9 +3,9 @@ const { AsyncLocalStorage } = require('node:async_hooks');
 
 const config = {
   host: process.env.DB_HOST || 'sql12.freesqldatabase.com',
-  user: process.env.DB_USER || 'sql12830745',
-  password: process.env.DB_PASSWORD || 'iNJwhh5Vgv',
-  database: process.env.DB_NAME || 'sql12830745',
+  user: process.env.DB_USER || 'sql12835916',
+  password: process.env.DB_PASSWORD || 'nMIvWNUQhk',
+  database: process.env.DB_NAME || 'sql12835916',
   waitForConnections: true,
   connectionLimit: 10
 };

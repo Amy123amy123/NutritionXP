@@ -296,20 +296,117 @@ async function removeFromCart(itemId) {
     }
 }
 
-// CHECKOUT
+// ── Shared Razorpay overlay helper ─────────────────────────────────────────
+// Call this from checkout(), buyNowFromDetail(), buyNow(), buyNowFromShop().
+// payload: { mode: 'cart' } or { mode: 'buy-now', buyNowPayload: {...} }
+async function openRazorpayCheckout({ mode, buyNowPayload, amountPaise }) {
+  // Build the create-order request body
+  const body = { amountPaise, currency: 'INR', mode };
+  if (mode === 'buy-now') body.buyNowPayload = buyNowPayload;
+
+  // Step 1 — get a Razorpay Order ID from our server
+  const orderData = await apiFetch('/api/razorpay/create-order', {
+    method: 'POST',
+    body: JSON.stringify(body)
+  });
+
+  return new Promise((resolve, reject) => {
+    const options = {
+      key:         orderData.keyId,
+      amount:      orderData.amount,
+      currency:    orderData.currency,
+      order_id:    orderData.orderId,
+      name:        'NutritionXP',
+      description: mode === 'cart' ? 'Cart Checkout' : (buyNowPayload?.name || 'Product Purchase'),
+      image:       'https://instasize.com/api/image/b0e2426687abd8cb722c1532731ddab8925659a72793c6f6c6bd7e1fa1f1c8f3.png',
+      prefill:     orderData.prefill || {},
+      theme:       { color: '#FF7A1A', hide_topbar: false },
+
+      // ── Payment method config — UPI QR shown as first block ──────────────
+      config: {
+        display: {
+          blocks: {
+            // "Scan & Pay" block — shows the UPI QR code
+            upi_qr: {
+              name: 'Scan & Pay (UPI QR)'
+            },
+            // Other methods grouped below
+            other: {
+              name: 'Other Payment Methods'
+            }
+          },
+          // UPI QR appears first, then the rest
+          sequence: ['block.upi_qr', 'block.other'],
+          preferences: {
+            show_default_blocks: true   // still show cards, netbanking, wallets etc.
+          }
+        }
+      },
+
+      // ── Which methods are allowed ─────────────────────────────────────────
+      method: {
+        upi:        true,   // enables UPI + QR
+        card:       true,
+        netbanking: true,
+        wallet:     true,
+        emi:        false
+      },
+
+      // Step 2 — payment succeeded in overlay → verify on server
+      handler: async function (response) {
+        try {
+          const verifyBody = {
+            razorpay_order_id:   response.razorpay_order_id,
+            razorpay_payment_id: response.razorpay_payment_id,
+            razorpay_signature:  response.razorpay_signature,
+            mode
+          };
+          if (mode === 'buy-now') verifyBody.buyNowPayload = buyNowPayload;
+
+          const result = await apiFetch('/api/razorpay/verify', {
+            method: 'POST',
+            body: JSON.stringify(verifyBody)
+          });
+          resolve(result);
+        } catch (err) {
+          reject(err);
+        }
+      },
+
+      callback_url: window.location.origin + '/payment-success.html?mode=' + mode,
+      redirect: false,
+
+      modal: {
+        ondismiss: function () {
+          reject(new Error('cancelled'));
+        }
+      }
+    };
+
+    const rzp = new Razorpay(options);
+    rzp.on('payment.failed', function (resp) {
+      reject(new Error(resp.error?.description || 'Payment failed'));
+    });
+    rzp.open();
+  });
+}
+
+// CHECKOUT — cart checkout via Razorpay
 async function checkout() {
     if (typeof requireAuthForCart === 'function' && !requireAuthForCart()) return;
     await reloadCart();
     if (cart.length === 0) return;
 
+    const amountPaise = Math.round(cart.reduce((s, i) => s + Number(i.price) * Number(i.quantity), 0) * 100);
+
     try {
-      const result = await apiFetch('/api/checkout', { method: 'POST' });
+      const result = await openRazorpayCheckout({ mode: 'cart', amountPaise });
       cart = [];
       updateCartCount();
       if (result.order) sendOrderEmail(result.order);
       showNotification();
     } catch (err) {
-      showToast(err.message);
+      if (err.message !== 'cancelled') showToast(err.message || 'Could not initiate payment.');
     }
 }
 

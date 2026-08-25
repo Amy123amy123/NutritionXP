@@ -156,7 +156,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (productsData.length > 0) initShopPage();
 });
 
-// BUY NOW from category/brand shop pages — cart is untouched
+// BUY NOW from category/brand shop pages — Razorpay overlay, cart untouched
 async function buyNowFromShop(productId) {
   const product = findProductById(productId) || productsData.find(p => p.id === productId);
   if (!product) return;
@@ -169,24 +169,23 @@ async function buyNowFromShop(productId) {
     showToast('Please log in to continue.');
     return;
   }
+  const buyNowPayload = {
+    productId:   product.id,
+    source:      'shop',
+    name:        product.name,
+    price:       product.price,
+    image:       product.image,
+    category:    product.category,
+    description: product.description,
+    quantity:    1
+  };
+  const amountPaise = Math.round(product.price * 100);
   try {
-    const result = await apiFetch('/api/buy-now', {
-      method: 'POST',
-      body: JSON.stringify({
-        productId: product.id,
-        source: 'shop',
-        name: product.name,
-        price: product.price,
-        image: product.image,
-        category: product.category,
-        description: product.description,
-        quantity: 1
-      })
-    });
+    const result = await openRazorpayCheckout({ mode: 'buy-now', buyNowPayload, amountPaise });
     if (typeof sendOrderEmail === 'function' && result.order) sendOrderEmail(result.order);
     if (typeof showNotification === 'function') showNotification();
     else showToast('Order placed successfully!');
   } catch (err) {
-    showToast(err.message || 'Could not place order.');
+    if (err.message !== 'cancelled') showToast(err.message || 'Could not place order.');
   }
 }

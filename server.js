@@ -1,11 +1,20 @@
+require('dotenv').config();
 const express = require('express');
+const crypto  = require('crypto');
 const session = require('express-session');
-const bcrypt = require('bcryptjs');
+const bcrypt  = require('bcryptjs');
+const Razorpay = require('razorpay');
 const db = require('./database');
 const { importFromExcel, isInStock } = require('./import-products');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// Razorpay instance — keys come from .env
+const razorpay = new Razorpay({
+  key_id:     process.env.RAZORPAY_KEY_ID     || 'rzp_test_XXXXXXXXXXXXXX',
+  key_secret: process.env.RAZORPAY_KEY_SECRET || 'XXXXXXXXXXXXXXXXXXXXXXXX'
+});
 
 app.use(express.json());
 
@@ -588,6 +597,182 @@ app.get('/api/brands', async (req, res) => {
 
   res.json({ success: true, brands: [...merged.values()] });
 });
+
+// ─── RAZORPAY ──────────────────────────────────────────────────────────────
+
+// Expose Key ID to the frontend (secret never leaves the server)
+app.get('/api/razorpay/config', (req, res) => {
+  res.json({ keyId: process.env.RAZORPAY_KEY_ID || 'rzp_test_XXXXXXXXXXXXXX' });
+});
+
+// Create a Razorpay Order for cart checkout or buy-now
+// Body: { amountPaise, currency?, mode, ...buyNowPayload? }
+// mode: 'cart' | 'buy-now'
+app.post('/api/razorpay/create-order', requireLogin, async (req, res) => {
+  try {
+    // Guard: reject immediately if keys are still placeholders
+    const keyId     = process.env.RAZORPAY_KEY_ID     || '';
+    const keySecret = process.env.RAZORPAY_KEY_SECRET || '';
+    if (!keyId || keyId.includes('XXXX') || !keySecret || keySecret.includes('XXXX')) {
+      return res.status(503).json({
+        success: false,
+        message: 'Razorpay keys are not configured. Open your .env file and replace the placeholder values with your real Key ID and Key Secret from https://dashboard.razorpay.com/app/keys, then restart the server.'
+      });
+    }
+
+    const { amountPaise, currency = 'INR', mode = 'cart', buyNowPayload } = req.body || {};
+    const userId = req.session.userId;
+
+    // ── Server-side amount validation ──────────────────────────────────────
+    let expectedPaise;
+    if (mode === 'cart') {
+      const items = await db.prepare('SELECT price, quantity FROM cart_items WHERE user_id = ?').all(userId);
+      if (!items.length) return res.status(400).json({ success: false, message: 'Your cart is empty.' });
+      const totalRs = items.reduce((s, i) => s + Number(i.price) * Number(i.quantity), 0);
+      expectedPaise = Math.round(totalRs * 100);
+    } else {
+      // buy-now: payload carries price + quantity
+      if (!buyNowPayload || buyNowPayload.price == null) {
+        return res.status(400).json({ success: false, message: 'Missing buy-now payload.' });
+      }
+      const qty = Math.max(1, parseInt(buyNowPayload.quantity, 10) || 1);
+      expectedPaise = Math.round(Number(buyNowPayload.price) * qty * 100);
+    }
+
+    // Reject if client-submitted amount differs from server calculation
+    if (Math.abs(Number(amountPaise) - expectedPaise) > 1) {
+      return res.status(400).json({ success: false, message: 'Amount mismatch. Please refresh and try again.' });
+    }
+
+    if (expectedPaise < 100) {
+      return res.status(400).json({ success: false, message: 'Minimum order amount is ₹1.' });
+    }
+
+    const rzpOrder = await razorpay.orders.create({
+      amount:   expectedPaise,
+      currency,
+      receipt:  'rcpt_' + userId + '_' + Date.now(),
+      notes:    { userId, mode }
+    });
+
+    // Fetch user details for pre-filling the checkout form
+    const user = await db.prepare('SELECT name, email, phone FROM users WHERE id = ?').get(userId);
+
+    res.json({
+      success:  true,
+      orderId:  rzpOrder.id,
+      amount:   rzpOrder.amount,
+      currency: rzpOrder.currency,
+      keyId:    process.env.RAZORPAY_KEY_ID || 'rzp_test_XXXXXXXXXXXXXX',
+      prefill:  { name: user?.name || '', email: user?.email || '', contact: user?.phone || '' }
+    });
+  } catch (err) {
+    console.error('Razorpay create-order error:', err);
+    // Razorpay SDK wraps API errors in err.error.description
+    const msg = err?.error?.description || err?.message || 'Could not create payment order.';
+    res.status(500).json({ success: false, message: msg });
+  }
+});
+
+// Verify Razorpay payment signature and persist the order to the database
+// Body: { razorpay_order_id, razorpay_payment_id, razorpay_signature, mode, buyNowPayload? }
+app.post('/api/razorpay/verify', requireLogin, async (req, res) => {
+  try {
+    const {
+      razorpay_order_id,
+      razorpay_payment_id,
+      razorpay_signature,
+      mode = 'cart',
+      buyNowPayload
+    } = req.body || {};
+
+    if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
+      return res.status(400).json({ success: false, message: 'Missing payment fields.' });
+    }
+
+    // ── HMAC-SHA256 signature verification ─────────────────────────────────
+    const expectedSig = crypto
+      .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET || 'XXXXXXXXXXXXXXXXXXXXXXXX')
+      .update(razorpay_order_id + '|' + razorpay_payment_id)
+      .digest('hex');
+
+    if (expectedSig !== razorpay_signature) {
+      return res.status(400).json({ success: false, message: 'Payment verification failed. Please contact support.' });
+    }
+
+    // ── Signature is valid — persist the order ──────────────────────────────
+    const userId = req.session.userId;
+    const orderNumber = 'ORD' + Date.now();
+
+    const insertOrder = db.prepare(
+      'INSERT INTO orders (user_id, order_number, total, status, created_at) VALUES (?, ?, ?, ?, NOW())'
+    );
+    const insertItem = db.prepare(`
+      INSERT INTO order_items (order_id, user_id, product_id, source, name, price, image, category, quantity)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `);
+
+    let orderResult;
+
+    if (mode === 'cart') {
+      const items = await db.prepare('SELECT * FROM cart_items WHERE user_id = ?').all(userId);
+      if (!items.length) return res.status(400).json({ success: false, message: 'Cart is empty.' });
+
+      const total = items.reduce((s, i) => s + Number(i.price) * Number(i.quantity), 0);
+
+      orderResult = await db.withTransaction(async () => {
+        const order = await insertOrder.run(userId, orderNumber, total, 'Paid');
+        const orderId = order.lastInsertRowid;
+        for (const item of items) {
+          await insertItem.run(orderId, userId, item.product_id, item.source, item.name, item.price, item.image || '', item.category || '', item.quantity);
+          await logCartActivity(userId, 'checked_out', { cartItemId: item.id, productId: item.product_id, source: item.source, productName: item.name, price: item.price, quantity: item.quantity });
+        }
+        await db.prepare('DELETE FROM cart_items WHERE user_id = ?').run(userId);
+        return {
+          orderNumber, total, orderId,
+          items: items.map(i => ({ id: i.product_id, name: i.name, price: Number(i.price), image: i.image || '', category: i.category || '', quantity: i.quantity }))
+        };
+      });
+    } else {
+      // buy-now: single item, cart untouched
+      const { productId, source, name, price, image, category, quantity } = buyNowPayload || {};
+      if (!productId || !name || price == null) {
+        return res.status(400).json({ success: false, message: 'Invalid buy-now payload.' });
+      }
+      const qty   = Math.max(1, parseInt(quantity, 10) || 1);
+      const total = Number(price) * qty;
+
+      orderResult = await db.withTransaction(async () => {
+        const order = await insertOrder.run(userId, orderNumber, total, 'Paid');
+        const orderId = order.lastInsertRowid;
+        await insertItem.run(orderId, userId, productId, source || 'direct', name, Number(price), image || '', category || '', qty);
+        await logCartActivity(userId, 'buy_now', { cartItemId: null, productId, source: source || 'direct', productName: name, price: Number(price), quantity: qty });
+        return {
+          orderNumber, total, orderId,
+          items: [{ id: productId, name, price: Number(price), image: image || '', category: category || '', quantity: qty }]
+        };
+      });
+    }
+
+    res.json({
+      success: true,
+      message: 'Payment verified and order placed!',
+      order: {
+        orderNumber: orderResult.orderNumber,
+        total:       orderResult.total,
+        date:        new Date().toLocaleString(),
+        status:      'Paid',
+        items:       orderResult.items,
+        paymentId:   razorpay_payment_id
+      }
+    });
+  } catch (err) {
+    console.error('Razorpay verify error:', err);
+    res.status(500).json({ success: false, message: err.message || 'Could not verify payment.' });
+  }
+});
+
+// ─── END RAZORPAY ───────────────────────────────────────────────────────────
 
 app.post('/api/admin/import-products', async (req, res) => {
   try {
